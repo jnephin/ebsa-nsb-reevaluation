@@ -194,3 +194,52 @@ richboxplot
 pdf("Output/Figures/RichnessbyEBSA_boxplot.pdf", width=7, height=9)
 richboxplot
 dev.off()
+
+
+
+
+
+# -------------------------------------------------#
+# box plots for productivity 
+
+load("Aggregated/EBSA_Productivity_Overlay.Rdata")
+
+# Convert list to data.frame
+df <- melt(dat)
+
+# EBSA column
+df$EBSA <- df$L1
+
+# Remove L1 column
+df <- df[!names(df) %in% c("L1","variable")]
+
+
+#plot
+prodboxplot <- ggplot(data = df, aes(x=EBSA,y=value,fill=Area))+
+  geom_boxplot(notch = TRUE, width=.8)+
+  labs(x="",y="Mean species richness / 5km grid cell")+
+  scale_fill_manual(values=c("#7fc97f","#386cb0"))+
+  #facet_wrap(~EBSA, scales="free", ncol=3)+
+  theme(panel.border = element_rect(fill=NA, colour="black"),
+        panel.background = element_rect(fill="white",colour="black"),
+        strip.background = element_rect(fill="white",colour="black"),
+        axis.ticks = element_line(colour="black"),
+        panel.grid= element_blank(),
+        axis.ticks.length = unit(0.1,"cm"),
+        axis.text.y = element_text(size=9, colour = "black"),
+        axis.text.x = element_text(size=9, colour = "black"),
+        axis.title = element_text(size=10),
+        legend.text = element_text(size=10),
+        legend.title = element_text(size=11, face="plain"),
+        legend.background = element_blank(), legend.key = element_blank(),
+        legend.key.height = unit(.5,"cm"), legend.key.width = unit(.4,"cm"),
+        legend.position = c(.85,.1),
+        panel.spacing = unit(.2, "lines"),
+        plot.margin = unit(c(.2,.2,.2,.2), "lines"))
+
+prodboxplot
+
+pdf("Output/Figures/ProductivitybyEBSA_boxplot.pdf", width=7, height=9)
+prodboxplot
+dev.off()
+
