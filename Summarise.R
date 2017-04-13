@@ -2,26 +2,42 @@
 require(reshape2)
 require(ggplot2)
 
-
+# global options
 options(scipen = 999)
 
 
 # load data
-load(file="Aggregated/EBSA_Aggregation.Rdata") #dat
+load(file="Aggregated/EBSA_Aggregation.Rdata") #df
 
 
-# Convert list to data.frame
-df <- melt(dat)
+# -------------------------------------------------#
+# organise data frame
 
-# add in/out tag
-df$Area <- "in"
-df$Area[grep("^nsb_",df$L1)] <- "out"
+# colname variable
+colnames(df)[3] <- "species"
 
-# EBSA column
-df$EBSA <- sub("^nsb_","", df$L1)
+# round values
+df$mean <- round(df$mean, 2)
+df$sd <- round(df$sd, 2)
+df$sum <- round(df$sum, 2)
+df$pPres <- round(df$pPres, 2)
+df$pNA <- round(df$pNA, 2)
 
-# Remove L1 column
-df <- df[!names(df) == "L1"]
+# melt
+melted <- melt(df)
+
+# cast
+casted <- dcast(EBSA + species + type ~  variable + Area, fun=mean, data=melted)
+df <- casted[c("EBSA","species","type","mean_in","mean_out","sd_in","sd_out",
+               "sum_in","sum_out","pPres_in","pPres_out","pNA_in","pNA_out")]
+
+# percent
+df$pPres_in <- df$pPres_in * 100
+df$pPres_out <- df$pPres_out * 100
+df$pNA_in <- df$pNA_in * 100
+df$pNA_out <- df$pNA_out * 100
+
+
 
 # -------------------------------------------------#
 # Reclass species names to common names
@@ -94,28 +110,12 @@ for(a in areas){
   subint <- rbind(subint, tmp)
 }
 
-# clean table
-subint$value <- round(subint$value, 2)
-subint <- subint[,!names(subint) == "variable"]
 
-# save
-save(subint,file= "Output/EBSA_MetledTable.RData")
-
-# cast
-casted <- dcast(EBSA + species + type  ~ metric + Area, fun=mean, data=subint)
-casted <- casted[c("EBSA","species","type","mean_in","mean_out","sd_in","sd_out",
-                   "sum_in","sum_out","pPres_in","pPres_out","pNA_in","pNA_out")]
-
-# percent
-casted$pPres_in <- casted$pPres_in * 100
-casted$pPres_out <- casted$pPres_out * 100
-casted$pNA_in <- casted$pNA_in * 100
-casted$pNA_out <- casted$pNA_out * 100
 
 
 # ----------------------------------------------------#
 # Export as csv
-write.csv(casted, file= "Output/EBSA_SummaryTable.csv", row.names=FALSE, na = "")
+write.csv(subint, file= "Output/EBSA_Species_SummaryTable.csv", row.names=FALSE, na = "")
 
 
 
@@ -126,38 +126,19 @@ write.csv(casted, file= "Output/EBSA_SummaryTable.csv", row.names=FALSE, na = ""
 # Diversity metrics for each EBSA
 
 div <- c("nSp_Fish", "nSp_Invert","Div_Fish", "Div_Invert")
-
-subdiv <- NULL
-for(a in areas){
-  tmp <- df[df$species %in% div,]
-  subdiv <- rbind(subdiv, tmp)
-}
+subdiv <- df[df$species %in% div,]
 
 # clean table
-subdiv$value <- round(subdiv$value, 2)
 subdiv <- subdiv[,!names(subdiv) == "variable"]
 subdiv$SpeciesGroup <- sub(".*_","", subdiv$species)
 subdiv$Variable <- sub("_.*","", subdiv$species)
 
-# save
-save(subdiv,file= "Output/EBSA_Diversity_MeltedTable.RData")
-
-# cast
-casteddiv <- dcast(EBSA + SpeciesGroup + Variable + type  ~ metric + Area, fun=mean, data=subdiv)
-casteddiv <- casteddiv[c("EBSA","SpeciesGroup", "Variable", "type",
-                         "mean_in","mean_out","sd_in","sd_out",
-                         "pPres_in","pPres_out","pNA_in","pNA_out")]
-
-# percent
-casteddiv$pPres_in <- casteddiv$pPres_in * 100
-casteddiv$pPres_out <- casteddiv$pPres_out * 100
-casteddiv$pNA_in <- casteddiv$pNA_in * 100
-casteddiv$pNA_out <- casteddiv$pNA_out * 100
-
+subdiv <- subdiv[c("EBSA","SpeciesGroup","Variable","mean_in","mean_out","sd_in","sd_out",
+                   "sum_in","sum_out","pPres_in","pPres_out","pNA_in","pNA_out")]
 
 # ----------------------------------------------------#
 # Export as csv
-write.csv(casteddiv, file= "Output/EBSA_Diversity_SummaryTable.csv", row.names=FALSE, na = "")
+write.csv(subdiv, file= "Output/EBSA_Diversity_SummaryTable.csv", row.names=FALSE, na = "")
 
 
 

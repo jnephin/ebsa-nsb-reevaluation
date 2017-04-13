@@ -6,7 +6,7 @@ library(reshape2)
 options(scipen = 999)
 
 # load data
-load(file="Aggregated/EBSA_Overlay.Rdata") #dat
+load(file="Aggregated/EBSA_Survey_Overlay.Rdata") #dat
 
 # Convert list to data.frame
 df <- melt(dat)
