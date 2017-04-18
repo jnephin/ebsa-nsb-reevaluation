@@ -6,16 +6,17 @@ library(raster)
 library(rgeos)
 
 
+# Speed up raster processes
+rasterOptions(chunksize = 1e+08, maxmemory = 1e+09)
+
+
 
 # Load boundary shapefile
 nsb <- readOGR(dsn="Boundary", layer="NSB")
 
 # load chla layer
-chla <- readOGR(dsn="Data/Productivity.gdb", layer="Chla_mean_nsb")
-
-# get centroid of chla polygons 1x1 km cells
-chlaPts <- gCentroid(chla, byid=TRUE)
-chlaPts <- SpatialPointsDataFrame(chlaPts, chla@data)
+chla <- raster("Data/Productivity/Chla_mean_nsb.tif")
+bloom <- raster("Data/Productivity/Bloom_freq_nsb.tif")
 
 
 
@@ -25,31 +26,28 @@ gdb <- "EBSA_Polygons/EBSAs_Overlay.gdb"
 ebsas <- ogrListLayers(gdb)
 
 # within only
-ebsas <- ebsas[-grep("^nsb_",ebsas)]
+#ebsas <- ebsas[-grep("^nsb_",ebsas)]
 
 # loop through each ebsa polygon
 # merge into one spatial polygon data frame
 spdf <- readOGR(dsn=gdb, layer=ebsas[1])
+spdf <- as( spdf, "SpatialPolygons" )
 spdf$EBSA <- rep(ebsas[1],length(spdf))
 for(i in ebsas[2:length(ebsas)]){
   #load polygons
   poly <- readOGR(dsn=gdb, layer=i) 
+  poly <- as( poly, "SpatialPolygons" )
   poly$EBSA <- rep(i,length(poly))
   spdf <- rbind(spdf,poly)
 }
-
-# Remove extra attributes
-spdf <- spdf[,names(spdf) %in% "EBSA"]
-
-
 
 
 # -------------------------------------------------#
 # Overlay survey grid data with EBSAs
 
 
-# empty list for loop
-dat <- list()
+# empty dataframe for loop
+dat <- NULL
 
 # loop through each ebsa polygon for survey data
 for(i in ebsas){
@@ -59,23 +57,32 @@ for(i in ebsas){
   poly$EBSA <- rep(i,length(poly))
   
   # overlay points on ebsa
-  overlay <- over(chlaPts, poly)
+  chla.over <- extract(chla, poly)
+  bloom.over <- extract(bloom, poly)
+  
+  # remove NA
+  chla.over <- chla.over[[1]]
+  chla.over <- chla.over[!is.na(chla.over)]
+  bloom.over <- bloom.over[[1]]
+  bloom.over <- bloom.over[!is.na(bloom.over)]
   
   # bind ebsa ID to point data
-  tmp <- cbind(chlaPts@data, EBSA=overlay$EBSA)
-  
-  # inside ebsa
-  tmp$Area <- "in"
-  
-  # outside ebsa
-  tmp$Area[is.na(tmp$EBSA)] <- "out"
-  
-  tmp <- tmp[c("Chla_mean","EBSA","Area")]
+  tmp <- data.frame( chla = chla.over, bloom = bloom.over, 
+                     EBSA = rep(i, length(overlay)) )
   
   # return
-  dat[[i]] <- tmp
+  dat <- rbind(dat, tmp)
   
 }
+
+
+# Inside / Outside
+dat$Area <- "in"
+dat$Area[grep("^nsb_",dat$EBSA)] <- "out"
+
+# EBSA
+dat$EBSA <- sub("nsb_","",dat$EBSA)
+
 
 # Save
 save(dat, file="Aggregated/EBSA_Productivity_Overlay.Rdata")
@@ -92,33 +99,22 @@ STDEV <- function(x){
 }
 
 
-#---------------------------------------------------------#
-
-
-# Convert list to data.frame
-df <- melt(dat)
-
-# EBSA column
-df$EBSA <- df$L1
-
-# Remove L1 column
-df <- df[!names(df) %in% c("L1","variable")]
-
-
 
 #---------------------------------------------------------#
 # aggregate
 
-aggr <- df %>%
+aggr <- dat %>%
   group_by(EBSA,Area) %>%
   summarise(
-    mean = MEAN(value),
-    sd = STDEV(value)) %>%
+    chla.mean = MEAN(chla),
+    chla.sd = STDEV(chla),
+    bloom.mean = MEAN(bloom),
+    bloom.sd = STDEV(bloom)) %>%
   as.data.frame()
 
 
 # save data
-save(df, file="Aggregated/EBSA_Productivity.Rdata")
+save(aggr, file="Aggregated/EBSA_Productivity.Rdata")
 
 
 
