@@ -5,6 +5,9 @@ library(rgeos)
 library(raster)
 library(RColorBrewer)
 
+# Go to parent directory
+setwd('..')
+
 
 # -------------------------------------------------#
 # Load EBSA in and outside polygons
@@ -16,10 +19,10 @@ ebsas <- ebsas[-grep("^nsb_",ebsas)]
 
 # loop through each ebsa polygon
 # merge into one spatial polygon data frame
-spdf <- readOGR(dsn=gdb, layer=ebsas[1]) 
+spdf <- readOGR(dsn=gdb, layer=ebsas[1])
 for(i in ebsas[2:length(ebsas)]){
   #load polygons
-  poly <- readOGR(dsn=gdb, layer=i) 
+  poly <- readOGR(dsn=gdb, layer=i)
   spdf <- rbind(spdf,poly)
 }
 
@@ -33,7 +36,7 @@ spdf <- as( spdf, "SpatialPolygons" )
 
 # -------------------------------------------------#
 # load boundary polygon
-nsb <- readOGR(dsn="Boundary", layer="NSB") 
+nsb <- readOGR(dsn="Boundary", layer="NSB")
 # Convert to spatial polygons (i.e., drop the data)
 nsb <- as( nsb, "SpatialPolygons" )
 
@@ -61,19 +64,19 @@ bloom <- raster("Data/Productivity/Bloom_freq_nsb.tif")
 # -------------------------------------------------#
 # MapRaster function
 MapRaster <- function( layer ){
-  
+
   # name
   name <- names(layer)
   name <- sub("_nsb","", name)
-  
+
   # Get the vertical and horizontal limits
   ext <- extent( layer )
   # Get x and y limits
   lims <- list( x=c(ext@xmin, ext@xmax), y=c(ext@ymin, ext@ymax) )
-  
+
   #colour
   pal <- rev(brewer.pal( 8, "Spectral" ))
-  
+
   # Map (up to 500,000 pixels)
   pdf( file=file.path("Output/Maps",  paste0(name,".pdf")),
        height=6, width=6*diff(lims$x)/diff(lims$y)+1 )
@@ -84,14 +87,11 @@ MapRaster <- function( layer ){
         legend.args=list(text=name, side=4, font=2, line=2.5, cex=0.8) )
   plot( spdf, add=T )
   dev.off()
-  
-} # End MapRaster function  
+
+} # End MapRaster function
 # -------------------------------------------------#
 
 
 # Map
 MapRaster( chla )
 MapRaster( bloom )
-
-
-

@@ -5,6 +5,9 @@ library(rgeos)
 library(classInt)
 library(RColorBrewer)
 
+# Go to parent directory
+setwd('..')
+
 
 # -------------------------------------------------#
 # Load EBSA in and outside polygons
@@ -16,10 +19,10 @@ ebsas <- ebsas[-grep("^nsb_",ebsas)]
 
 # loop through each ebsa polygon
 # merge into one spatial polygon data frame
-spdf <- readOGR(dsn=gdb, layer=ebsas[1]) 
+spdf <- readOGR(dsn=gdb, layer=ebsas[1])
 for(i in ebsas[2:length(ebsas)]){
   #load polygons
-  poly <- readOGR(dsn=gdb, layer=i) 
+  poly <- readOGR(dsn=gdb, layer=i)
   spdf <- rbind(spdf,poly)
 }
 
@@ -33,7 +36,7 @@ spdf <- as( spdf, "SpatialPolygons" )
 
 # -------------------------------------------------#
 # load boundary polygon
-nsb <- readOGR(dsn="Boundary", layer="NSB") 
+nsb <- readOGR(dsn="Boundary", layer="NSB")
 # Convert to spatial polygons (i.e., drop the data)
 nsb <- as( nsb, "SpatialPolygons" )
 
@@ -56,7 +59,7 @@ load(file="Aggregated/Presence.Rdata") #presence_grid
 
 # species/groups to map
 species <- c("SeaOtterRange","Geoduck","RedUrchin","RedSeaCucumber","Shrimp","KillerWhale",
-             "Herring","Lingcod","Halibut","Halibut_Longline","StellarSeaLionRookeries", 
+             "Herring","Lingcod","Halibut","Halibut_Longline","StellarSeaLionRookeries",
              "Humpback","BlueWhale","FinWhale","GreyWhale","GreenUrchin", "Abalone",
              "DungenessCrab","PacificCod","Eulachon","Sablefish","Sablefish_Longline",
              "Hake","WidowRockfish","TannerCrab","SpermWhale","SpongeReefs","DoverSole",
@@ -85,14 +88,14 @@ names(survey_grid)[names(survey_grid) == "Thaleichthys_pacificus"] <- "Eulachon"
 # -------------------------------------------------#
 # Map function
 MapLayers <- function( griddata, layers, type, style="kmeans"){
-  
+
   # loop through layers
   layers <- layers[layers %in% names(griddata)]
   for(p in layers){
-    
+
     # Keep only attribute to plot
     Layer <- griddata[p]
-    
+
     # Set colour scale
     if( type == "presence" ){ #If factor
       # colour
@@ -125,12 +128,12 @@ MapLayers <- function( griddata, layers, type, style="kmeans"){
       Layer@data$labels <- labels
       Layer <- sp::merge( Layer, pal, by = "labels")
     }
-    
+
     # Get the vertical and horizontal limits
     ext <- extent( Layer )
     # Get x and y limits
     lims <- list( x=c(ext@xmin, ext@xmax), y=c(ext@ymin, ext@ymax) )
-    
+
     # Map
     pdf( file=file.path("Output/Maps",  paste0(p,"_", type, ".pdf")),
          height=6, width=5.25*diff(lims$x)/diff(lims$y)+1 )
@@ -143,15 +146,12 @@ MapLayers <- function( griddata, layers, type, style="kmeans"){
     legend( "bottomleft", legend = pal$labels, fill = pal$colours,
             title = p, bg = NA, box.col = NA)
     dev.off()
-    
+
   } # end loop through layers
-} # End MapLayers function  
+} # End MapLayers function
 # -------------------------------------------------#
 
 
 # Map
 MapLayers( griddata = survey_grid, layers = species, type = "survey")
 MapLayers( griddata = presence_grid, layers = species, type = "presence")
-
-
-

@@ -3,6 +3,9 @@ library(rgdal)
 library(raster)
 library(rgeos)
 
+# Go to parent directory
+setwd('..')
+
 
 # -------------------------------------------------#
 # Load boundary shapefile
@@ -21,7 +24,7 @@ iphc <- as( iphc, "SpatialPoints" )
 
 
 # -------------------------------------------------#
-# Load GF Synoptic 
+# Load GF Synoptic
 gf <- readOGR(dsn="FishSurveys/GFSynoptic_Weights.gdb", layer="All_proj")
 
 # Convert to spatial polygons (i.e., drop the data)
@@ -39,7 +42,7 @@ phma <- as( phma, "SpatialPoints" )
 
 # -------------------------------------------------#
 # load boundary polygon
-nsb <- readOGR(dsn="Boundary", layer="NSB") 
+nsb <- readOGR(dsn="Boundary", layer="NSB")
 # Convert to spatial polygons (i.e., drop the data)
 nsb <- as( nsb, "SpatialPolygons" )
 
@@ -66,7 +69,7 @@ ebsas <- c("CapeStJames","McIntyreBay")
 spdf <- readOGR(dsn=gdb, layer=ebsas[1])
 for(i in ebsas[2:length(ebsas)]){
   #load polygons
-  poly <- readOGR(dsn=gdb, layer=i) 
+  poly <- readOGR(dsn=gdb, layer=i)
   spdf <- rbind(spdf,poly)
 }
 
@@ -92,8 +95,6 @@ plot( gf, border=NA, add = T , pch = 1, cex = .5, col="#7fc97f")
 plot( phma, border=NA, add = T, pch = 2, cex = .5, col="#386cb0" )
 plot( iphc, border=NA, add = T, pch = 3, cex = .5, col="#f0027f" )
 plot( spdf, add=T )
-legend( "bottomleft", legend = c("GF Synoptic", "PHMA", "IPHC"), pch = c(1,2,3), 
+legend( "bottomleft", legend = c("GF Synoptic", "PHMA", "IPHC"), pch = c(1,2,3),
         col= c("#7fc97f","#386cb0","#f0027f"), bg = NA, box.col = NA)
 dev.off()
-
-

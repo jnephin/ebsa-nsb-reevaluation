@@ -2,6 +2,9 @@
 library(dplyr)
 library(reshape2)
 
+# Go to parent directory
+setwd('..')
+
 # global options
 options(scipen = 999)
 
@@ -83,6 +86,3 @@ df <- rbind(survey_aggr, pres_aggr[names(survey_aggr)])
 
 # save data
 save(df, file="Aggregated/EBSA_Aggregation.Rdata")
-
-
-

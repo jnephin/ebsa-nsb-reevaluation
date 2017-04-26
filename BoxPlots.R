@@ -1,6 +1,10 @@
 # Load packages
 library(ggplot2)
 library(reshape2)
+library(reshape2)
+
+# Go to parent directory
+setwd('..')
 
 # global options
 options(scipen = 999)
@@ -162,7 +166,7 @@ dev.off()
 
 
 # -------------------------------------------------#
-# box plots for richness 
+# box plots for richness
 
 richdf <- df[df$variable %in% c("nSp_Fish","nSp_Invert"),]
 richdf$label <- sub(".*_","", richdf$variable)
@@ -200,17 +204,20 @@ dev.off()
 
 
 # -------------------------------------------------#
-# box plots for productivity 
+# box plots for productivity
 
 load("Aggregated/EBSA_Productivity_Overlay.Rdata")
+colnames(dat)[1:2] <- c("Mean Chlorophyll Concentration", "Bloom Frequency")
+prod <- melt(dat)
 
 
 
 #plot
-Chlaboxplot <- ggplot(data = dat, aes(x=EBSA,y=chla,fill=Area))+
+Chlaboxplot <- ggplot(data = prod, aes(x=EBSA,y=value,fill=Area))+
   geom_boxplot(notch = TRUE, width=.8)+
   labs(x="",y="Mean Chlorophyll Concentration")+
   scale_fill_manual(values=c("#7fc97f","#386cb0"))+
+  facet_grid(variable~., scales="free")+
   theme(panel.border = element_rect(fill=NA, colour="black"),
         panel.background = element_rect(fill="white",colour="black"),
         strip.background = element_rect(fill="white",colour="black"),
@@ -230,36 +237,6 @@ Chlaboxplot <- ggplot(data = dat, aes(x=EBSA,y=chla,fill=Area))+
 
 Chlaboxplot
 
-pdf("Output/Figures/ChlaEBSA_boxplot.pdf", width=7, height=9)
+pdf("Output/Figures/ProductivityEBSA_boxplot.pdf", width=9, height=7)
 Chlaboxplot
 dev.off()
-
-
-#plot
-Bloomboxplot <- ggplot(data = dat, aes(x=EBSA,y=bloom,fill=Area))+
-  geom_boxplot(notch = TRUE, width=.8)+
-  labs(x="",y="Mean Chlorophyll Concentration")+
-  scale_fill_manual(values=c("#7fc97f","#386cb0"))+
-  theme(panel.border = element_rect(fill=NA, colour="black"),
-        panel.background = element_rect(fill="white",colour="black"),
-        strip.background = element_rect(fill="white",colour="black"),
-        axis.ticks = element_line(colour="black"),
-        panel.grid= element_blank(),
-        axis.ticks.length = unit(0.1,"cm"),
-        axis.text.y = element_text(size=9, colour = "black"),
-        axis.text.x = element_text(size=9, colour = "black", angle=40, hjust=1),
-        axis.title = element_text(size=10),
-        legend.text = element_text(size=10),
-        legend.title = element_text(size=11, face="plain"),
-        legend.background = element_blank(), legend.key = element_blank(),
-        legend.key.height = unit(.5,"cm"), legend.key.width = unit(.4,"cm"),
-        legend.position = "right",
-        panel.spacing = unit(.2, "lines"),
-        plot.margin = unit(c(.5,.5,.5,.5), "lines"))
-
-Bloomboxplot
-
-pdf("Output/Figures/BloomEBSA_boxplot.pdf", width=7, height=9)
-Bloomboxplot
-dev.off()
-

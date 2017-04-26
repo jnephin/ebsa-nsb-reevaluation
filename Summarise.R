@@ -5,6 +5,9 @@ require(ggplot2)
 # global options
 options(scipen = 999)
 
+# Go to parent directory
+setwd('..')
+
 
 # load data
 load(file="Aggregated/EBSA_Aggregation.Rdata") #df
@@ -48,40 +51,65 @@ df$species[df$species == "Gadus_macrocephalus"] <- "PacificCod"
 df$species[df$species == "Ophiodon_elongatus"] <- "Lingcod"
 df$species[df$species == "Merluccius_productus"] <- "Hake"
 df$species[df$species == "Anoplopoma_fimbria"] <- "Sablefish"
-df$species[df$species == "Microstomus_pacificus"] <- "DoverSole"
 df$species[df$species == "Sebastes_alutus"] <- "PacificOceanPerch"
 df$species[df$species == "Sebastes_flavidus"] <- "YellowtailRockfish"
 df$species[df$species == "Sebastes_reedi"] <- "YellowmouthRockfish"
 df$species[df$species == "Sebastes_saxicola"] <- "WidowRockfish"
 df$species[df$species == "Thaleichthys_pacificus"] <- "Eulachon"
+df$species[df$species == "Microstomus_pacificus"] <- "DoverSole"
+df$species[df$species == "Psettichthys_melanostictus"] <- "SandSole"
+df$species[df$species == "Isopsetta_isolepis"] <- "ButterSole"
+df$species[df$species == "Parophrys_vetulus"] <- "EnglishSole"
+df$species[df$species == "Lepidopsetta_bilineata"] <- "RockSole"
+df$species[df$species == "Acipenser_medirostris"] <- "GreenSturgeon"
+df$species[df$species == "Sebastes_ruberrimus"] <- "YelloweyeRockfish"
+df$species[df$species == "Sebastes_caurinus"] <- "CopperRockfish"
+df$species[df$species == "Sebastes_nigrocinctus"] <- "TigerRockfish"
+df$species[df$species == "Sebastes_nebulosus"] <- "ChinaRockfish"
+df$species[df$species == "Sebastes_maliger"] <- "QuillbackRockfish"
+df$species[df$species == "Sebastes_melanops"] <- "BlackRockfish"
+
 
 # -------------------------------------------------#
 # Species important to each EBSA
 
-BellaBellaNearshore <- c("SeaOtterRange","Geoduck","RedUrchin","RedSeaCucumber",
-                         "Shrimp","KillerWhale","Herring")
-BrooksPeninsula <- c("SeaOtterRange","Lingcod")      
-CapeStJames <- c("Halibut", "Halibut_Longline","StellarSeaLionRookeries",
-                 "Humpback","BlueWhale","FinWhale")   
-CentralMainland  <- c("SeaOtterRange","StellarSeaLionRookeries","KillerWhale","FinWhale",
-                      "Humpback","GreyWhale","GreenUrchin","RedUrchin","Abalone")
-ChathamSound  <- c("GreenUrchin","DungenessCrab","Shrimp","Herring","KillerWhale","Humpback")       
-DogfishBank <-  c("DungenessCrab","PacificCod")
-HaidaGwaiiNearshore <- c("FinWhale","Humpback","RedUrchin","RedSeaCucumber","Herring",
-                         "PacificCod","Abalone","StellarSeaLionRookeries")   
 HecateStraitFront <- NULL
-LearmonthBank  <-  c("FinWhale")       
 McIntyreBay <-  c("DungenessCrab","Halibut","Halibut_Longline","Eulachon","Herring",
                   "KillerWhale","Humpback")
-NorthIslandsStraits <- c("KillerWhale","GreyWhale", "Humpback","Herring","Shrimp",
-                         "GreenUrchin","SeaOtterRange")
+DogfishBank <-  c("DungenessCrab","PacificCod", "Shearwaters", "Phalaropes",
+                  "Herring_gulls","Ancient_Murrelet", "White-winged_Scoters",
+                  "Black-winged_Scoters","SandSole","ButterSole","EnglishSole","RockSole")
+LearmonthBank  <-  c("FinWhale","GreyWhale", "Alcids")
+BrooksPeninsula <- c("SeaOtterRange","Lingcod","GreenSturgeon","Phalaropes","Common_Murre",
+                     "Tufted_Puffin","Sooty_Shearwater","Glaucous-winged_Gull",
+                     "Rhinoceros_Auklet","Black-legged_Kittiwake")
+CapeStJames <- c("Halibut", "Halibut_Longline","StellarSeaLionRookeries",
+                 "Humpback","BlueWhale","FinWhale")
+ShelfBreak <- c("Hake","Humpback","TannerCrab","SpermWhale", "BlueWhale","SeiWhale",
+                "FinWhale","Eulachon","Sablefish","Sablefish_Longline","DoverSole",
+                "PacificOceanPerch","YellowtailRockfish","YellowmouthRockfish","GreyWhale",
+                "Cassins_Auklet","Ancient_Murrelet","Rhinoceros_Auklet","Tufted_Puffin",
+                "Fork-tailed_Storm-petrels", "Leachs_Storm-petrels")
 ScottIslands <-  c("SeaOtterRange","GreyWhale","Humpback","StellarSeaLionRookeries",
                    "PacificCod","Lingcod","Sablefish","Sablefish_Longline","Hake",
-                   "Herring","WidowRockfish")
-ShelfBreak <- c("Hake","Humpback","TannerCrab","SpermWhale", "BlueWhale", 
-                "FinWhale", "Eulachon","Sablefish","Sablefish_Longline","DoverSole",
-                "PacificOceanPerch","YellowtailRockfish","YellowmouthRockfish")
+                   "Herring","WidowRockfish","Cassins_Auklet","Rhinoceros_Auklet",
+                   "Tufted_Puffin","Common_Murre","Brandts_Cormorant","Pelagic_Cormorant",
+                   "Pigeon_Guillemot","Glaucous-winged_Gull","Fork-tailed_Storm-petrels",
+                   "Leachs_Storm-petrels")
+NorthIslandsStraits <- c("KillerWhale","GreyWhale", "Humpback","Herring","Shrimp", "Prawn",
+                         "GreenUrchin","SeaOtterRange","Rhinoceros_Auklet",
+                         "Fork-tailed_Storm-petrels", "Leachs_Storm-petrels")
 SpongeReefs <-  c("SpongeReefs")
+ChathamSound  <- c("GreenUrchin","DungenessCrab","Shrimp","HerringSpawn","KillerWhale","Humpback",
+                   "Black-winged_Scoters","White-winged_Scoters")
+CentralMainland  <- c("SeaOtterRange","StellarSeaLionRookeries","KillerWhale","FinWhale",
+                      "Humpback","GreyWhale","RedSeaCucumber") # not in table: overlap with sea cuc IA, rockfish are inshore spp found in conservation priorities SAR
+BellaBellaNearshore <- c("SeaOtterRange","Geoduck","RedUrchin","RedSeaCucumber",
+                         "Shrimp","KillerWhale","HerringSpawn")
+HaidaGwaiiNearshore <- c("FinWhale","Humpback","RedUrchin","RedSeaCucumber","HerringSpawn",
+                         "PacificCod","Abalone","StellarSeaLionRookeries","Sooty_Shearwaters")
+
+
 
 spint <- list(BellaBellaNearshore=BellaBellaNearshore,
               BrooksPeninsula=BrooksPeninsula,
@@ -139,8 +167,3 @@ subdiv <- subdiv[c("EBSA","SpeciesGroup","Variable","mean_in","mean_out","sd_in"
 # ----------------------------------------------------#
 # Export as csv
 write.csv(subdiv, file= "Output/EBSA_Diversity_SummaryTable.csv", row.names=FALSE, na = "")
-
-
-
-
-

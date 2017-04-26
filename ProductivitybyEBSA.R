@@ -5,6 +5,9 @@ library(rgdal)
 library(raster)
 library(rgeos)
 
+# Go to parent directory
+setwd('..')
+
 
 # Speed up raster processes
 rasterOptions(chunksize = 1e+08, maxmemory = 1e+09)
@@ -35,7 +38,7 @@ spdf <- as( spdf, "SpatialPolygons" )
 spdf$EBSA <- rep(ebsas[1],length(spdf))
 for(i in ebsas[2:length(ebsas)]){
   #load polygons
-  poly <- readOGR(dsn=gdb, layer=i) 
+  poly <- readOGR(dsn=gdb, layer=i)
   poly <- as( poly, "SpatialPolygons" )
   poly$EBSA <- rep(i,length(poly))
   spdf <- rbind(spdf,poly)
@@ -51,28 +54,28 @@ dat <- NULL
 
 # loop through each ebsa polygon for survey data
 for(i in ebsas){
-  
+
   #load polygons
   poly <- readOGR(dsn=gdb, layer=i)
   poly$EBSA <- rep(i,length(poly))
-  
+
   # overlay points on ebsa
   chla.over <- extract(chla, poly)
   bloom.over <- extract(bloom, poly)
-  
+
   # remove NA
   chla.over <- chla.over[[1]]
   chla.over <- chla.over[!is.na(chla.over)]
   bloom.over <- bloom.over[[1]]
   bloom.over <- bloom.over[!is.na(bloom.over)]
-  
+
   # bind ebsa ID to point data
-  tmp <- data.frame( chla = chla.over, bloom = bloom.over, 
+  tmp <- data.frame( chla = chla.over, bloom = bloom.over,
                      EBSA = rep(i, length(overlay)) )
-  
+
   # return
   dat <- rbind(dat, tmp)
-  
+
 }
 
 
@@ -115,6 +118,3 @@ aggr <- dat %>%
 
 # save data
 save(aggr, file="Aggregated/EBSA_Productivity.Rdata")
-
-
-

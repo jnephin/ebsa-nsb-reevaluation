@@ -3,6 +3,9 @@ library(rgdal)
 library(raster)
 library(rgeos)
 
+# Go to parent directory
+setwd('..')
+
 
 # -------------------------------------------------#
 # Load gridded data
@@ -29,7 +32,7 @@ spdf <- as( spdf, "SpatialPolygons" )
 spdf$EBSA <- rep(ebsas[1],length(spdf))
 for(i in ebsas[2:length(ebsas)]){
   #load polygons
-  poly <- readOGR(dsn=gdb, layer=i) 
+  poly <- readOGR(dsn=gdb, layer=i)
   poly <- as( poly, "SpatialPolygons" )
   poly$EBSA <- rep(i,length(poly))
   spdf <- rbind(spdf,poly)
@@ -63,7 +66,7 @@ for(i in ebsas){
 
   # inside ebsa
   tmp$Area <- "in"
-  
+
   # outside ebsa
   tmp$Area[is.na(tmp$EBSA)] <- "out"
 
@@ -86,26 +89,26 @@ dat <- list()
 
 # loop through each ebsa polygon for survey data
 for(i in ebsas){
-  
+
   #load polygons
   poly <- readOGR(dsn=gdb, layer=i)
   poly$EBSA <- rep(i,length(poly))
-  
+
   # overlay points on ebsa
   overlay <- over(survey_grid, poly)
-  
+
   # bind ebsa ID to point data
   tmp <- cbind(presence_grid@data, EBSA=overlay$EBSA)
-  
+
   # inside ebsa
   tmp$Area <- "in"
-  
+
   # outside ebsa
   tmp$Area[is.na(tmp$EBSA)] <- "out"
-  
+
   # return
   dat[[i]] <- tmp
-  
+
 }
 
 # Save
