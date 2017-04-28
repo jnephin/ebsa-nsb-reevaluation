@@ -69,6 +69,20 @@ df$species[df$species == "Sebastes_nebulosus"] <- "ChinaRockfish"
 df$species[df$species == "Sebastes_maliger"] <- "QuillbackRockfish"
 df$species[df$species == "Sebastes_melanops"] <- "BlackRockfish"
 
+df$species[df$species == "Rissa_tridactyla"] <- "Black-legged_Kittiwake"
+df$species[df$species == "Phalacrocorax_penicillatus"] <- "Brandts_Cormorant"
+df$species[df$species == "Ptychoramphus_aleuticus"] <- "Cassins_Auklet"
+df$species[df$species == "Uria_aalge"] <- "Common_Murre"
+df$species[df$species == "Larus_glaucescens"] <- "Glaucous-winged_Gull"
+df$species[df$species == "Oceanodroma_leucorhoa"] <- "Leachs_Storm-petrels"
+df$species[df$species == "Oceanodroma_furcata"] <- "Fork-tailed_Storm-petrels"
+df$species[df$species == "Phalacrocorax_pelagicus"] <- "Pelagic_Cormorant"
+df$species[df$species == "Cepphus_columba"] <- "Pigeon_Guillemot"
+df$species[df$species == "Cerorhinca_monocerata"] <- "Rhinoceros_Auklet"
+df$species[df$species == "Fratercula_cirrhata"] <- "Tufted_Puffin"
+df$species[df$species == "Melanitta"] <- "Scoters"
+df$species[df$species == "Alcidae"] <- "Alcids"
+df$species[df$species == "Phalaropus"] <- "Phalaropes"
 
 # -------------------------------------------------#
 # Species important to each EBSA
@@ -77,8 +91,8 @@ HecateStraitFront <- NULL
 McIntyreBay <-  c("DungenessCrab","Halibut","Halibut_Longline","Eulachon","Herring",
                   "KillerWhale","Humpback")
 DogfishBank <-  c("DungenessCrab","PacificCod", "Shearwaters", "Phalaropes",
-                  "Herring_Gulls","Ancient_Murrelet", "White-winged_Scoters",
-                  "Black-winged_Scoters","SandSole","ButterSole","EnglishSole","RockSole")
+                  "Herring_Gulls","Ancient_Murrelet", "Scoters",
+                  "SandSole","ButterSole","EnglishSole","RockSole")
 LearmonthBank  <-  c("FinWhale","GreyWhale", "Alcids")
 BrooksPeninsula <- c("SeaOtterRange","Lingcod","GreenSturgeon","Phalaropes","Common_Murre",
                      "Tufted_Puffin","Sooty_Shearwater","Glaucous-winged_Gull",
@@ -101,7 +115,7 @@ NorthIslandsStraits <- c("KillerWhale","GreyWhale", "Humpback","Herring","Shrimp
                          "Fork-tailed_Storm-petrels", "Leachs_Storm-petrels")
 SpongeReefs <-  c("SpongeReefs")
 ChathamSound  <- c("GreenUrchin","DungenessCrab","Shrimp","HerringSpawn","KillerWhale",
-                   "Humpback","Black-winged_Scoters","White-winged_Scoters")
+                   "Humpback","Scoters")
 CentralMainland  <- c("SeaOtterRange","StellarSeaLionRookeries","KillerWhale","FinWhale",
                       "Humpback","GreyWhale","RedSeaCucumber") # not in table: overlap with sea cuc IA, rockfish are inshore spp found in conservation priorities SAR
 BellaBellaNearshore <- c("SeaOtterRange","Geoduck","RedUrchin","RedSeaCucumber",
@@ -137,9 +151,6 @@ for(a in areas){
   tmp <- df[df$species %in% spint[[a]] & df$EBSA == a,]
   subint <- rbind(subint, tmp)
 }
-
-
-
 
 # ----------------------------------------------------#
 # Export as csv
