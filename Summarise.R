@@ -77,7 +77,7 @@ HecateStraitFront <- NULL
 McIntyreBay <-  c("DungenessCrab","Halibut","Halibut_Longline","Eulachon","Herring",
                   "KillerWhale","Humpback")
 DogfishBank <-  c("DungenessCrab","PacificCod", "Shearwaters", "Phalaropes",
-                  "Herring_gulls","Ancient_Murrelet", "White-winged_Scoters",
+                  "Herring_Gulls","Ancient_Murrelet", "White-winged_Scoters",
                   "Black-winged_Scoters","SandSole","ButterSole","EnglishSole","RockSole")
 LearmonthBank  <-  c("FinWhale","GreyWhale", "Alcids")
 BrooksPeninsula <- c("SeaOtterRange","Lingcod","GreenSturgeon","Phalaropes","Common_Murre",
@@ -100,8 +100,8 @@ NorthIslandsStraits <- c("KillerWhale","GreyWhale", "Humpback","Herring","Shrimp
                          "GreenUrchin","SeaOtterRange","Rhinoceros_Auklet",
                          "Fork-tailed_Storm-petrels", "Leachs_Storm-petrels")
 SpongeReefs <-  c("SpongeReefs")
-ChathamSound  <- c("GreenUrchin","DungenessCrab","Shrimp","HerringSpawn","KillerWhale","Humpback",
-                   "Black-winged_Scoters","White-winged_Scoters")
+ChathamSound  <- c("GreenUrchin","DungenessCrab","Shrimp","HerringSpawn","KillerWhale",
+                   "Humpback","Black-winged_Scoters","White-winged_Scoters")
 CentralMainland  <- c("SeaOtterRange","StellarSeaLionRookeries","KillerWhale","FinWhale",
                       "Humpback","GreyWhale","RedSeaCucumber") # not in table: overlap with sea cuc IA, rockfish are inshore spp found in conservation priorities SAR
 BellaBellaNearshore <- c("SeaOtterRange","Geoduck","RedUrchin","RedSeaCucumber",
