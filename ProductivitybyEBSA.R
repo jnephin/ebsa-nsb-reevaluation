@@ -1,3 +1,19 @@
+###############################################################################
+#
+# Authors:      Jessica Nephin
+# Affiliation:  Fisheries and Oceans Canada (DFO)
+# Group:        Marine Spatial Ecology and Analysis
+# Location:     Institute of Ocean Sciences
+# Contact:      e-mail: jessica.nephin@dfo-mpo.gc.ca | tel: 250.363.6564
+# Project:      NSB EBSA re-assessment
+#
+# Overview:
+# Summarises the productivity raster layers by EBSAs
+# * Adds an attribute to the chlorophyll data that describes its position inside or outside each EBSA
+# * Calculates the mean and stdev for mean chla and bloom freqency for each EBSA
+#
+###############################################################################
+
 # Load packages
 library(dplyr)
 library(reshape2)
@@ -12,15 +28,12 @@ setwd('..')
 # Speed up raster processes
 rasterOptions(chunksize = 1e+08, maxmemory = 1e+09)
 
-
-
 # Load boundary shapefile
 nsb <- readOGR(dsn="Boundary", layer="NSB")
 
-# load chla layer
+# load chla layer (includes straylight)
 chla <- raster("Data/Productivity/Chla_mean_nsb.tif")
 bloom <- raster("Data/Productivity/Bloom_freq_nsb.tif")
-
 
 
 # -------------------------------------------------#

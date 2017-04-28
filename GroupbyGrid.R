@@ -1,3 +1,19 @@
+###############################################################################
+#
+# Authors:      Jessica Nephin
+# Affiliation:  Fisheries and Oceans Canada (DFO)
+# Group:        Marine Spatial Ecology and Analysis
+# Location:     Institute of Ocean Sciences
+# Contact:      e-mail: jessica.nephin@dfo-mpo.gc.ca | tel: 250.363.6564
+# Project:      NSB EBSA re-assessment
+#
+# Overview:
+# Aggregates by grid cell
+#  * Calculates mean and sd per grid cell for survey data
+#  * Calculates presence of points within grid cell for presence and polygon data
+#
+###############################################################################
+
 # Load packages
 library(rgdal)
 library(raster)
@@ -24,7 +40,7 @@ for(i in fc_list){
   dat <- readOGR(dsn=gdb, layer=i)
   # assign matching proj4 string
   if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  proj4string(dat) <-   proj4string(grid)
   # aggregate points using grid
   aggr <- aggregate(dat, grid, FUN="mean", na.rm=T)
   # add to data.frame
@@ -49,7 +65,7 @@ for(i in fc_list){
   dat <- readOGR(dsn=gdb, layer=i)
   # assign matching proj4 string
   if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  proj4string(dat) <-   proj4string(grid)
   # aggregate points using grid
   aggr <- aggregate(dat, grid, FUN="sd", na.rm=T)
   # add to data.frame
@@ -81,7 +97,7 @@ for(i in fc_list){
   dat <- readOGR(dsn=gdb, layer=i)
   # assign matching proj4 string
   if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  proj4string(dat) <-   proj4string(grid)
   # overlay points on grid
   overlay <- over(grid, dat)
   # present = 1
@@ -99,39 +115,6 @@ presence_df <- df
 
 
 
-## Fishery Data ##
-
-# load gdb
-gdb="Data/FisheryData.gdb"
-fc_list = ogrListLayers(gdb)
-
-# Empty dataframe for loop
-df <- 1:nrow(grid)
-
-for(i in fc_list){
-  # load feature class
-  dat <- readOGR(dsn=gdb, layer=i)
-  # assign matching proj4 string
-  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
-  # overlay points on grid
-  overlay <- over(grid, dat)
-  # present = 1
-  overlay$presence <- 1
-  overlay$presence[is.na(overlay[,1])] <- 0
-  # add to data.frame
-  df <- cbind(df, overlay["presence"] )
-  # rename column
-  ind <- which(names(df) %in%"presence")
-  colnames(df)[ind] <- i
-}
-
-# rename dataframe
-fishery_df <- df
-
-
-
-
 ## Polygon Data ##
 
 # load gdb
@@ -146,7 +129,7 @@ for(i in fc_list){
   dat <- readOGR(dsn=gdb, layer=i)
   # assign matching proj4 string
   if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  proj4string(dat) <-   proj4string(grid)
   # overlay points on grid
   overlay <- over(grid, dat)
   # present = 1
@@ -167,10 +150,9 @@ polygon_df <- df
 ## combine all binary grid data ##
 
 # add all presence gridded data into one spdf
-df <- cbind(presence_df,fishery_df,polygon_df)
+df <- cbind(presence_df, polygon_df)
 df <- df[,!names(df) %in% "df"]
 presence_grid <- SpatialPolygonsDataFrame(grid, df)
 
 # Save
 save(presence_grid, file="Aggregated/Presence.Rdata")
-

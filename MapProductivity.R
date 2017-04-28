@@ -1,3 +1,17 @@
+###############################################################################
+#
+# Authors:      Jessica Nephin
+# Affiliation:  Fisheries and Oceans Canada (DFO)
+# Group:        Marine Spatial Ecology and Analysis
+# Location:     Institute of Ocean Sciences
+# Contact:      e-mail: jessica.nephin@dfo-mpo.gc.ca | tel: 250.363.6564
+# Project:      NSB EBSA re-assessment
+#
+# Overview:
+# Exports maps of mean chla and bloom freqency with EBSA boundaries
+#
+###############################################################################
+
 # Load packages
 library(rgdal)
 library(sp)

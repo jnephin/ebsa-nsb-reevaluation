@@ -1,3 +1,20 @@
+###############################################################################
+#
+# Authors:      Jessica Nephin
+# Affiliation:  Fisheries and Oceans Canada (DFO)
+# Group:        Marine Spatial Ecology and Analysis
+# Location:     Institute of Ocean Sciences
+# Contact:      e-mail: jessica.nephin@dfo-mpo.gc.ca | tel: 250.363.6564
+# Project:      NSB EBSA re-assessment
+#
+# Overview:
+# Summarises survery and presence data metrics calculated in GroupbyEBSA.R
+# * Only includes species listed as important for the EBSAs in
+#   Clark & Jamieson 2006 Phase II
+# * Exports 2 summary tables: species abundance/presence and diveristy/richness
+#
+###############################################################################
+
 # Load packages
 require(reshape2)
 require(ggplot2)
@@ -30,7 +47,7 @@ df$pNA <- round(df$pNA, 2)
 melted <- melt(df)
 
 # cast
-casted <- dcast(EBSA + species + type ~  variable + Area, fun=mean, data=melted)
+casted <- dcast(EBSA + type + species ~  variable + Area, fun=mean, data=melted)
 df <- casted[c("EBSA","species","type","mean_in","mean_out","sd_in","sd_out",
                "sum_in","sum_out","pPres_in","pPres_out","pNA_in","pNA_out")]
 
@@ -68,7 +85,6 @@ df$species[df$species == "Sebastes_nigrocinctus"] <- "TigerRockfish"
 df$species[df$species == "Sebastes_nebulosus"] <- "ChinaRockfish"
 df$species[df$species == "Sebastes_maliger"] <- "QuillbackRockfish"
 df$species[df$species == "Sebastes_melanops"] <- "BlackRockfish"
-
 df$species[df$species == "Rissa_tridactyla"] <- "Black-legged_Kittiwake"
 df$species[df$species == "Phalacrocorax_penicillatus"] <- "Brandts_Cormorant"
 df$species[df$species == "Ptychoramphus_aleuticus"] <- "Cassins_Auklet"
@@ -139,10 +155,6 @@ spint <- list(BellaBellaNearshore=BellaBellaNearshore,
               ShelfBreak=ShelfBreak,
               SpongeReefs=SpongeReefs)
 
-
-# ----------------------------------------------------#
-# Subset df with only species of interest to each EBSA
-
 areas <- c("BellaBellaNearshore","BrooksPeninsula","CapeStJames","CentralMainland","ChathamSound",
            "DogfishBank","HaidaGwaiiNearshore","LearmonthBank","McIntyreBay","NorthIslandsStraits",
            "ScottIslands","ShelfBreak","SpongeReefs")
@@ -152,11 +164,8 @@ for(a in areas){
   subint <- rbind(subint, tmp)
 }
 
-# ----------------------------------------------------#
 # Export as csv
 write.csv(subint, file= "Output/EBSA_Species_SummaryTable.csv", row.names=FALSE, na = "")
-
-
 
 
 
@@ -174,7 +183,5 @@ subdiv$Variable <- sub("_.*","", subdiv$species)
 
 subdiv <- subdiv[c("EBSA","SpeciesGroup","Variable","mean_in","mean_out","sd_in","sd_out",
                    "sum_in","sum_out","pPres_in","pPres_out","pNA_in","pNA_out")]
-
-# ----------------------------------------------------#
 # Export as csv
 write.csv(subdiv, file= "Output/EBSA_Diversity_SummaryTable.csv", row.names=FALSE, na = "")
