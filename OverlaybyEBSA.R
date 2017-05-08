@@ -30,6 +30,7 @@ smean <- survey_grid
 load(file="Aggregated/Survey_SD.Rdata") #survey_grid
 ssd <- survey_grid
 load(file="Aggregated/Presence.Rdata") #presence_grid
+pres <- presence_grid
 
 # Load boundary shapefile
 nsb <- readOGR(dsn="Boundary", layer="NSB")

@@ -8,7 +8,7 @@ Before running the scripts:
 4) Organise data into 3 geodatabases: SurveyData.gdb, PresenceData.gdb and PolygonData.gdb   
 5) Each feature in the geodatabase is a distinct layer (e.g. species, cholorophyll, diversity)   
 6) For survey data features rename the field of interest with the name of the feature   
-7) Create 1km grid from NSB polygon (with 1km buffer)
+7) Create 1km grid from NSB polygon (with 1km buffer to ensure no data is lost at the coastal boundary)
 
 
 GroupbyGrid.R
@@ -51,7 +51,7 @@ Summarises the productivity raster layers by EBSAs
 
 MapProductivity.R
 -----------------
-Exports maps of mean chla and bloom frequencywith EBSA boundaries
+Exports maps of mean chla and bloom frequency with EBSA boundaries
 
 
 BoxPlots.R

@@ -23,7 +23,7 @@ library(rgeos)
 setwd('..')
 
 # Load grid
-grid <- readOGR(dsn="Grid", layer="NSB_1km_buffered")
+grid <- readOGR(dsn="Grid", layer="NSB_5km_buffered")
 
 
 ## Survey Data - Mean ##
@@ -40,7 +40,7 @@ for(i in fc_list){
   dat <- readOGR(dsn=gdb, layer=i)
   # assign matching proj4 string
   if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(dat) <-   proj4string(grid)
+  proj4string(grid) <-   proj4string(dat)
   # aggregate points using grid
   aggr <- aggregate(dat, grid, FUN="mean", na.rm=T)
   # add to data.frame
@@ -50,9 +50,9 @@ for(i in fc_list){
 # Remove SourceKey, x and y columns
 df <- df[,!names(df) %in% c("df", "SourceKey","x","y")]
 # add dataframe back onto grid
-survey_grid <- SpatialPolygonsDataFrame(grid, df)
+smean <- SpatialPolygonsDataFrame(grid, df)
 # Save
-save(survey_grid, file="Aggregated/Survey_Mean.Rdata")
+save(smean, file="Aggregated/Survey_Mean.Rdata")
 
 
 ## Survey Data - Standard Deviation ##
@@ -65,7 +65,7 @@ for(i in fc_list){
   dat <- readOGR(dsn=gdb, layer=i)
   # assign matching proj4 string
   if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(dat) <-   proj4string(grid)
+  proj4string(grid) <-   proj4string(dat)
   # aggregate points using grid
   aggr <- aggregate(dat, grid, FUN="sd", na.rm=T)
   # add to data.frame
@@ -75,9 +75,9 @@ for(i in fc_list){
 # Remove SourceKey, x and y columns
 df <- df[,!names(df) %in% c("df", "SourceKey","x","y")]
 # add dataframe back onto grid
-survey_grid <- SpatialPolygonsDataFrame(grid, df)
+ssd <- SpatialPolygonsDataFrame(grid, df)
 # Save
-save(survey_grid, file="Aggregated/Survey_SD.Rdata")
+save(ssd, file="Aggregated/Survey_SD.Rdata")
 
 
 
@@ -97,7 +97,7 @@ for(i in fc_list){
   dat <- readOGR(dsn=gdb, layer=i)
   # assign matching proj4 string
   if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(dat) <-   proj4string(grid)
+  proj4string(grid) <-   proj4string(dat)
   # overlay points on grid
   overlay <- over(grid, dat)
   # present = 1
@@ -129,7 +129,7 @@ for(i in fc_list){
   dat <- readOGR(dsn=gdb, layer=i)
   # assign matching proj4 string
   if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(dat) <-   proj4string(grid)
+  proj4string(grid) <-   proj4string(dat)
   # overlay points on grid
   overlay <- over(grid, dat)
   # present = 1
@@ -152,7 +152,7 @@ polygon_df <- df
 # add all presence gridded data into one spdf
 df <- cbind(presence_df, polygon_df)
 df <- df[,!names(df) %in% "df"]
-presence_grid <- SpatialPolygonsDataFrame(grid, df)
+pres <- SpatialPolygonsDataFrame(grid, df)
 
 # Save
-save(presence_grid, file="Aggregated/Presence.Rdata")
+save(pres, file="Aggregated/Presence.Rdata")
