@@ -27,11 +27,8 @@ setwd('..')
 
 # -------------------------------------------------#
 # Load EBSA in and outside polygons
-gdb <- "EBSA_Polygons/EBSAs_Overlay.gdb"
+gdb <- "EBSA_Polygons/EBSAs.gdb"
 ebsas <- ogrListLayers(gdb)
-
-# within only
-ebsas <- ebsas[-grep("^nsb_",ebsas)]
 
 # loop through each ebsa polygon
 # merge into one spatial polygon data frame
@@ -68,12 +65,8 @@ bcPoly <- spTransform( bcPoly, proj4string(nsb))
 
 # -------------------------------------------------#
 # Load gridded data
-load(file="Aggregated/Survey_Mean.Rdata") #survey_grid
-smean <- survey_grid
-load(file="Aggregated/Survey_SD.Rdata") #survey_grid
-ssd <- survey_grid
-load(file="Aggregated/Presence.Rdata") #presence_grid
-pres <- presence_grid
+load(file="Aggregated/Grid_Survey_Mean.Rdata") #smean
+load(file="Aggregated/Grid_Presence.Rdata") #pres
 
 # species/groups to map
 species <- c("Abalone","Alcids","Ancient_Murrelet","Black_legged_Kittiwake","BlueWhale",
@@ -85,54 +78,59 @@ species <- c("Abalone","Alcids","Ancient_Murrelet","Black_legged_Kittiwake","Blu
              "PacificOceanPerch","Pelagic_Cormorant","Phalaropes","Pigeon_Guillemot",
              "Prawn","RedSeaCucumber","RedUrchin","Rhinoceros_Auklet","RockSole","Sablefish",
              "Sablefish_phma","SandSole","Scoters","SeaOtterRange","SeiWhale","Shearwaters",
-             "Shrimp","Sooty_Shearwaters","SpermWhale","SpongeReefs","StellarSeaLionRookeries",
+             "Shrimp","Sooty_Shearwaters","SpermWhale","SpongeReef","StellarSeaLionRookeries",
              "TannerCrab","Tufted_Puffin","WidowRockfish","YellowmouthRockfish","YellowtailRockfish",
              "BlackRockfish","ChinaRockfish","CopperRockfish","QuillbackRockfish","TigerRockfish",
-             "YelloweyeRockfish","Div_Fish","Div_Invert","nSp_Fish","nSp_Invert")
+             "YelloweyeRockfish")
 
 # Reclass species names to common names
-for (d in c("smean", "ssd", "pres")){
+for (d in c("smean", "pres")){
   df <- get(d)
   names(df)[names(df) == "Hippoglossus_stenolepis"] <- "Halibut"
-  names(df)[names(df) == "Hippoglossus_stenolepis_phma"] <- "Halibut_phma"
+  names(df)[names(df) == "Hippoglossus_stenolepis_phma"] <- "Halibut (PHMA)"
   names(df)[names(df) == "Clupea_pallasii_pallasii"] <- "Herring"
-  names(df)[names(df) == "Gadus_macrocephalus"] <- "PacificCod"
+  names(df)[names(df) == "Gadus_macrocephalus"] <- "Pacific Cod"
   names(df)[names(df) == "Ophiodon_elongatus"] <- "Lingcod"
-  names(df)[names(df) == "Ophiodon_elongatus_phma"] <- "Lingcod_phma"
-  names(df)[names(df) == "Merluccius_productus"] <- "Hake"
+  names(df)[names(df) == "Ophiodon_elongatus_phma"] <- "Lingcod (PHMA)"
+  names(df)[names(df) == "Merluccius_productus"] <- "Pacific Hake"
   names(df)[names(df) == "Anoplopoma_fimbria"] <- "Sablefish"
-  names(df)[names(df) == "Anoplopoma_fimbria_phma"] <- "Sablefish_phma"
-  names(df)[names(df) == "Sebastes_alutus"] <- "PacificOceanPerch"
-  names(df)[names(df) == "Sebastes_flavidus"] <- "YellowtailRockfish"
-  names(df)[names(df) == "Sebastes_reedi"] <- "YellowmouthRockfish"
-  names(df)[names(df) == "Sebastes_saxicola"] <- "WidowRockfish"
+  names(df)[names(df) == "Anoplopoma_fimbria_phma"] <- "Sablefish (PHMA)"
+  names(df)[names(df) == "Sebastes_alutus"] <- "Pacific Ocean Perch"
+  names(df)[names(df) == "Sebastes_flavidus"] <- "Yellowtail Rockfish"
+  names(df)[names(df) == "Sebastes_reedi"] <- "Yellowmouth Rockfish"
+  names(df)[names(df) == "Sebastes_saxicola"] <- "Widow Rockfish"
   names(df)[names(df) == "Thaleichthys_pacificus"] <- "Eulachon"
-  names(df)[names(df) == "Microstomus_pacificus"] <- "DoverSole"
-  names(df)[names(df) == "Psettichthys_melanostictus"] <- "SandSole"
-  names(df)[names(df) == "Isopsetta_isolepis"] <- "ButterSole"
-  names(df)[names(df) == "Parophrys_vetulus"] <- "EnglishSole"
-  names(df)[names(df) == "Lepidopsetta_bilineata"] <- "RockSole"
-  names(df)[names(df) == "Acipenser_medirostris"] <- "GreenSturgeon"
-  names(df)[names(df) == "Sebastes_ruberrimus"] <- "YelloweyeRockfish"
-  names(df)[names(df) == "Sebastes_caurinus"] <- "CopperRockfish"
-  names(df)[names(df) == "Sebastes_nigrocinctus"] <- "TigerRockfish"
-  names(df)[names(df) == "Sebastes_nebulosus"] <- "ChinaRockfish"
-  names(df)[names(df) == "Sebastes_maliger"] <- "QuillbackRockfish"
-  names(df)[names(df) == "Sebastes_melanops"] <- "BlackRockfish"
-  names(df)[names(df) == "Rissa_tridactyla"] <- "Black_legged_Kittiwake"
-  names(df)[names(df) == "Phalacrocorax_penicillatus"] <- "Brandts_Cormorant"
-  names(df)[names(df) == "Ptychoramphus_aleuticus"] <- "Cassins_Auklet"
-  names(df)[names(df) == "Uria_aalge"] <- "Common_Murre"
-  names(df)[names(df) == "Larus_glaucescens"] <- "Glaucous_winged_Gull"
-  names(df)[names(df) == "Oceanodroma_leucorhoa"] <- "Leachs_Storm_petrels"
-  names(df)[names(df) == "Oceanodroma_furcata"] <- "Fork_tailed_Storm_petrels"
-  names(df)[names(df) == "Phalacrocorax_pelagicus"] <- "Pelagic_Cormorant"
-  names(df)[names(df) == "Cepphus_columba"] <- "Pigeon_Guillemot"
-  names(df)[names(df) == "Cerorhinca_monocerata"] <- "Rhinoceros_Auklet"
-  names(df)[names(df) == "Fratercula_cirrhata"] <- "Tufted_Puffin"
+  names(df)[names(df) == "Microstomus_pacificus"] <- "Dover Sole"
+  names(df)[names(df) == "Psettichthys_melanostictus"] <- "Sand Sole"
+  names(df)[names(df) == "Isopsetta_isolepis"] <- "Butter Sole"
+  names(df)[names(df) == "Parophrys_vetulus"] <- "English Sole"
+  names(df)[names(df) == "Lepidopsetta_bilineata"] <- "Rock Sole"
+  names(df)[names(df) == "Acipenser_medirostris"] <- "Green Sturgeon"
+  names(df)[names(df) == "Sebastes_ruberrimus"] <- "Yelloweye Rockfish"
+  names(df)[names(df) == "Sebastes_caurinus"] <- "Copper Rockfish"
+  names(df)[names(df) == "Sebastes_nigrocinctus"] <- "Tiger Rockfish"
+  names(df)[names(df) == "Sebastes_nebulosus"] <- "China Rockfish"
+  names(df)[names(df) == "Sebastes_maliger"] <- "Quillback Rockfish"
+  names(df)[names(df) == "Sebastes_melanops"] <- "Black Rockfish"
+  names(df)[names(df) == "Rissa_tridactyla"] <- "Black-legged Kittiwake"
+  names(df)[names(df) == "Phalacrocorax_penicillatus"] <- "Brandt's Cormorant"
+  names(df)[names(df) == "Ptychoramphus_aleuticus"] <- "Cassin's Auklet"
+  names(df)[names(df) == "Uria_aalge"] <- "Common Murre"
+  names(df)[names(df) == "Larus_glaucescens"] <- "Glaucous-winged Gull"
+  names(df)[names(df) == "Oceanodroma_leucorhoa"] <- "Leach's Storm Petrels"
+  names(df)[names(df) == "Oceanodroma_furcata"] <- "Fork Tailed Storm Petrels"
+  names(df)[names(df) == "Phalacrocorax_pelagicus"] <- "Pelagic Cormorant"
+  names(df)[names(df) == "Cepphus_columba"] <- "Pigeon Guillemot"
+  names(df)[names(df) == "Synthliboramphus_antiquus"] <-"Ancient Murrelet"
+  names(df)[names(df) == "Cerorhinca_monocerata"] <- "Rhinoceros Auklet"
+  names(df)[names(df) == "Fratercula_cirrhata"] <- "Tufted Puffin"
   names(df)[names(df) == "Melanitta"] <- "Scoters"
   names(df)[names(df) == "Alcidae"] <- "Alcids"
   names(df)[names(df) == "Phalaropus"] <- "Phalaropes"
+  names(df)[names(df) == "Div_Fish"] <- "Fish Diversity"
+  names(df)[names(df) == "Div_Invert"] <- "Invert Diversity"
+  names(df)[names(df) == "nSp_Fish"] <- "Fish Richness"
+  names(df)[names(df) == "nSp_Invert"] <- "Invert Richness"
   assign(d, df)
 }
 
@@ -146,7 +144,7 @@ for (d in c("smean", "ssd", "pres")){
 MapLayers <- function( griddata, layers, dir, type, style="kmeans"){
 
   # loop through layers
-  layers <- layers[layers %in% names(griddata)]
+  layers <- unique(names(griddata))
   for(p in layers){
 
     # Keep only attribute to plot
@@ -202,7 +200,7 @@ MapLayers <- function( griddata, layers, dir, type, style="kmeans"){
 
     # Map
     tiff(file=file.path("Output/Maps", dir, paste0(p, ".tif")),
-         width = 5 , height = 5.25, units = "in", res = 800,
+         width = 5 , height = 5.25, units = "in", res = 300,
          compression = "lzw")
     par(mar=c(1,1,1,1))
     plot( Layer, col=Layer$colours, border=NA, xlim = lims$x , ylim = lims$y )
@@ -219,7 +217,5 @@ MapLayers <- function( griddata, layers, dir, type, style="kmeans"){
 
 
 # Map
-MapLayers( griddata = smean, layers = species, dir = "Abundance/Mean", type = "survey")
-MapLayers( griddata = ssd, layers = species[!species == "GreenSturgeon"], 
-           dir = "Abundance/SD", type = "survey")
+MapLayers( griddata = smean, layers = species, dir = "Survey", type = "survey")
 MapLayers( griddata = pres, layers = species, dir = "Presence", type = "presence")

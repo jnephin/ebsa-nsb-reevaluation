@@ -43,7 +43,8 @@ names(dfsurvey)[names(dfsurvey) == "L1"] <- "Species"
 
 # subset survey data to only include stat == mean
 dfsurvey <- dfsurvey[dfsurvey$stat == "mean",]
-
+# subset presence data to only include stat == pPres
+dfpres <- dfpres[dfpres$stat == "pPres",]
 
 #---------------------------------------------------------#
 
@@ -103,6 +104,25 @@ for (d in c("dfpres", "dfsurvey")){
 
 
 # -------------------------------------------------#
+# Reclass brid names to short names
+
+dfsurvey$Species[dfsurvey$Species == "Ancient_Murrelet"] <- "Murrelet"
+dfsurvey$Species[dfsurvey$Species == "Black_legged_Kittiwake"] <- "Kittiwake"
+dfsurvey$Species[dfsurvey$Species == "Brandts_Cormorant"] <- "B. Cormorant"
+dfsurvey$Species[dfsurvey$Species == "Cassins_Auklet"] <- "C. Auklet"
+dfsurvey$Species[dfsurvey$Species == "Common_Murre"] <- "Common Murre"
+dfsurvey$Species[dfsurvey$Species == "Fork_tailed_Storm_petrels"] <- "F.T. Storm Petrels"
+dfsurvey$Species[dfsurvey$Species == "Glaucous_winged_Gull"] <- "G.W. Gull"
+dfsurvey$Species[dfsurvey$Species == "Herring_Gulls"] <- "Herring Gulls"
+dfsurvey$Species[dfsurvey$Species == "Leachs_Storm_petrels"] <- "L. Storm Petrels"
+dfsurvey$Species[dfsurvey$Species == "Pelagic_Cormorant"] <- "P. Cormorant"
+dfsurvey$Species[dfsurvey$Species == "Pigeon_Guillemot"] <- "Pigeon Guillemot"
+dfsurvey$Species[dfsurvey$Species == "Rhinoceros_Auklet"] <- "R. Auklet"
+dfsurvey$Species[dfsurvey$Species == "Tufted_Puffin"] <- "Tufted Puffin"
+
+
+
+# -------------------------------------------------#
 # plotting function
 
 spplot <- function(df, grp, ylab, height, width, ncol, size=size){
@@ -137,7 +157,7 @@ spplot <- function(df, grp, ylab, height, width, ncol, size=size){
 # figures
 # fish
 spplot(df=dfsurvey, grp="Fish", ylab="Mean Density", 
-       height = 7, width = 5.5, ncol = 4, size = 8)
+       height = 7.5, width = 6, ncol = 4, size = 8)
 # birds
 spplot(df=dfsurvey, grp="Birds", ylab="Mean Density", 
        height = 5.5, width = 4, ncol = 3, size = 8)

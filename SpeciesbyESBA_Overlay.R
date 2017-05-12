@@ -17,11 +17,14 @@ library(rgdal)
 library(raster)
 library(rgeos)
 
+# Go to parent directory
+setwd('..')
+
 
 # -------------------------------------------------#
 # Load gridded data
-load(file="Aggregated/Survey_Mean.Rdata") #smean
-load(file="Aggregated/Presence.Rdata") #pres
+load(file="Aggregated/Grid_Survey_Mean.Rdata") #smean
+load(file="Aggregated/Grid_Presence.Rdata") #pres
 
 
 
@@ -205,7 +208,7 @@ for(s in species){
 }
 
 # Save
-save(meanEBSA, file="Aggregated/EBSA_Mean_Overlay.Rdata")
+save(meanEBSA, file="Aggregated/EBSA_Survey_Overlay.Rdata")
 
 
 

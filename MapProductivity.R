@@ -92,7 +92,7 @@ MapRaster <- function( layer ){
   pal <- rev(brewer.pal( 8, "Spectral" ))
 
   # Map (up to 500,000 pixels)
-  pdf( file=file.path("Output/Maps",  paste0(name,".pdf")),
+  pdf( file=file.path("Output/Maps/Productivity",  paste0(name,".pdf")),
        height=6, width=6*diff(lims$x)/diff(lims$y)+1 )
   par( mar=c(1,1,1,5) )
   plot( bcPoly, col = "grey40", border = NA, xlim = lims$x*.98 , ylim = lims$y*.98 )

@@ -52,7 +52,7 @@ df <- df[,!names(df) %in% c("df", "SourceKey","x","y")]
 # add dataframe back onto grid
 smean <- SpatialPolygonsDataFrame(grid, df)
 # Save
-save(smean, file="Aggregated/Survey_Mean.Rdata")
+save(smean, file="Aggregated/Grid_Survey_Mean.Rdata")
 
 
 ## Survey Data - Standard Deviation ##
@@ -77,7 +77,7 @@ df <- df[,!names(df) %in% c("df", "SourceKey","x","y")]
 # add dataframe back onto grid
 ssd <- SpatialPolygonsDataFrame(grid, df)
 # Save
-save(ssd, file="Aggregated/Survey_SD.Rdata")
+save(ssd, file="Aggregated/Grid_Survey_SD.Rdata")
 
 
 
@@ -155,4 +155,4 @@ df <- df[,!names(df) %in% "df"]
 pres <- SpatialPolygonsDataFrame(grid, df)
 
 # Save
-save(pres, file="Aggregated/Presence.Rdata")
+save(pres, file="Aggregated/Grid_Presence.Rdata")

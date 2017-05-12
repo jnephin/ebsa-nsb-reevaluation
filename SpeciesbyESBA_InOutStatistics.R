@@ -27,14 +27,14 @@ setwd('..')
 
 # functions
 pPres <- function(x){
-  y <- x[!is.na(x)]
-  p <- length(y[y>0])/length(y)
-  return(p)
+  length(x[x>0 & !is.na(x)])/length(x)
 }
 pNA <- function(x){
   length(x[is.na(x)])/length(x)
 }
-
+p0 <- function(x){
+  length(x[x==0])/length(x)
+}
 
 
 # load data
@@ -59,11 +59,15 @@ species <- c("Abalone","Alcids","Ancient_Murrelet","Black_legged_Kittiwake","Blu
              "BlackRockfish","ChinaRockfish","CopperRockfish","QuillbackRockfish","TigerRockfish",
              "YelloweyeRockfish")
 
-
+# ebsas
+ebsas <- c("HecateStraitFront","BellaBellaNearshore","BrooksPeninsula","CapeStJames",
+           "CentralMainland","ChathamSound","DogfishBank","HaidaGwaiiNearshore",
+           "LearmonthBank","McIntyreBay","NorthIslandsStraits","ScottIslands",
+           "ShelfBreak","SpongeReefs")
 
 #---------------------------------------------------------#
 
-## Survay Data ##
+## Survey Data ##
 
 # empty list
 surveydat <- list()
@@ -115,7 +119,7 @@ for(s in species){
       # 95% CI using the percentile method
       q_mean = quantile(boot_mean, c(0.025, 0.975), na.rm=TRUE)
       q_pPres = quantile(boot_pPres, c(0.025, 0.975), na.rm=TRUE)
-      q_pNA = quantile(boot_pNA, c(0.025, 0.975))
+      q_pNA = quantile(boot_pNA, c(0.025, 0.975), na.rm=TRUE)
       
       # Bind together
       stats <- c(sp_mean,sp_pPres,sp_pNA)
@@ -170,7 +174,8 @@ for(s in species){
       
       # Compute statistics of sample data
       sp_pPres <- pPres(spdat)*100
-
+      sp_pNA <- p0(spdat)*100
+      
       # Number of bootstrap samples
       nboot <- 10000
       # Generate bootstrap samples, i.e. an array of n x nboot 
@@ -180,14 +185,19 @@ for(s in species){
       
       # Compute statistics of the bootstrap samples
       boot_pPres <- apply(bootstrapsample, 2, pPres) * 100
-
+      boot_pNA <- apply(bootstrapsample, 2, pNA) * 100
+      
       # Find the 0.05 and 0.95 quantile for each statistic
       # 95% CI using the percentile method
       q_pPres = quantile(boot_pPres, c(0.025, 0.975))
-
+      q_pNA = quantile(boot_pNA, c(0.025, 0.975))
+      
       # Bind together
-      df <- data.frame(EBSA = e, stat = "pPres",
-                       value = sp_pPres,lower_CI = q_pPres[1], upper_CI = q_pPres[2],
+      stats <- c(sp_pPres,sp_pNA)
+      lower <- c(q_pPres[1],q_pNA[1])
+      upper <-c(q_pPres[2],q_pNA[2])
+      df <- data.frame(EBSA = e, stat = c("pPres","pNA"),
+                       value = stats,lower_CI = lower, upper_CI = upper,
                        stringsAsFactors = FALSE)
       dat <- rbind(dat, df)
     }
