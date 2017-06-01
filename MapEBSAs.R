@@ -9,7 +9,7 @@
 #
 # Overview:
 # Exports maps of species abundance/presence and richness/diveristy data
-#   aggregate by grid
+# aggregate by grid
 #
 ###############################################################################
 

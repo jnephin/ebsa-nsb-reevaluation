@@ -7,7 +7,7 @@
 # Contact:      e-mail: jessica.nephin@dfo-mpo.gc.ca | tel: 250.363.6564
 # Project:      NSB EBSA re-assessment
 #
-# Overview: Prodcues figures that compare species statistics inside and outside 
+# Overview: Produces figures that compare species statistics inside and outside 
 #          ebsa. Species are those listed as important for the EBSAs in 
 #          Clark & Jamieson 2006 Phase II.
 #

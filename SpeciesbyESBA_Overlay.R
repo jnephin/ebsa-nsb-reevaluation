@@ -7,10 +7,14 @@
 # Project:      NSB EBSA re-assessment
 #
 # Overview:
-# 
+#  1) Groups species into EBSAs for which they were listed as important
+#  2) Performs spatial overlay for each species. Adds an inside or outside
+#     attribute for each cell for each of the relavant EBSAs.
 #
 ###############################################################################
 
+
+###-- to do: use centroids of the grids rather than the polygon grids themselves in overlay. That way a grid cell mostly outside of the EBSA won't be counted as inside.
 
 # Load packages
 library(rgdal)

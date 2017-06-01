@@ -8,9 +8,8 @@
 # Project:      NSB EBSA re-assessment
 #
 # Overview:
-# Summarises the productivity raster layers by EBSAs
-# * Adds an attribute to the chlorophyll data that describes its position inside or outside each EBSA
-# * Calculates the mean and stdev for mean chla and bloom freqency for each EBSA
+# Performs spatial overlay for each chlorophyll layer. Adds an inside or outside 
+# attribute for each raster cell for each EBSAs.
 #
 ###############################################################################
 

@@ -7,7 +7,8 @@
 # Project:      NSB EBSA re-assessment
 #
 # Overview:
-# 
+# Performs spatial overlay for each diversity metric. Adds an inside or outside 
+# attribute for each cell for each EBSAs.
 #
 ###############################################################################
 

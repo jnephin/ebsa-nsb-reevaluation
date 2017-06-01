@@ -7,58 +7,64 @@ Before running the scripts:
 3) Clip data to NSB boundary   
 4) Organise data into 3 geodatabases: SurveyData.gdb, PresenceData.gdb and PolygonData.gdb   
 5) Each feature in the geodatabase is a distinct layer (e.g. species, cholorophyll, diversity)   
-6) For survey data features rename the field of interest with the name of the feature   
+6) For survey data features, rename the field of interest with the name of the feature   
 7) Create 1km grid from NSB polygon (with 1km buffer to ensure no data is lost at the coastal boundary)
 
 
 GroupbyGrid.R
 -------------
 Aggregates by grid cell
-* Calculates mean and sd per grid cell for survey data
+* Calculates mean and sd per grid cell for density data
 * Calculates presence of points within grid cell for presence and polygon data
 
 
-MapEBSAs.R
-----------
-Exports maps of species abundance/presence and richness/diveristy data aggregate by grid
+SpeciesbyEBSA_Overlay.R
+-----------------------
+Performs spatial overlay for each species. Adds an inside or outside attribute
+for each cell for each of the relavant EBSAs.
+
+SpeciesbyEBSA_InOutStatistics.R
+-------------------------------
+Computes sample and bootstrap statistics by species for each important EBSA and the area 
+outside of all important EBSAs. Uses the percentile bootstrapping method to estimate 
+a 95% confidence interval around the sample statistic.
+
+SpeciesbyEBSA_Figures.R
+-----------------------
+Produces figures that compare species statistics inside and outside EBSAs.
 
 
-OverlaybyEBSA.R
----------------
-Adds an attribute to the gridded data that describes its position inside or outside each EBSA
+ProductivitybyEBSA_Overlay.R
+----------------------------
+Performs spatial overlay for each chlorophyll layer. Adds an inside or outside attribute
+for each raster cell for each EBSAs.
 
+DiversitybyEBSA_Overlay.R
+-------------------------
+Performs spatial overlay for each diversity metric. Adds an inside or outside attribute
+for each cell for each EBSAs.
 
-GroupbyEBSA.R
---------------
-Aggregates by in and outside each EBSA polgyon
-* Calculates the mean, sd, percent of occurence and percent of missing data for survey data
-* Caluclates the sum and percent of occurence for presence data
+DivProdbyEBSA_InOutStatistics.R
+-------------------------------
+Computes sample and bootstrap statistics for diversity and productivity metrics by species 
+for each EBSA. Uses the percentile bootstrapping method to estimate a 95% confidence 
+interval around the sample statistic.
+
+DivProdbyEBSA_Figures.R
+-----------------------
+Produces figures that compare diveristy and productivity statistics between EBSAs and 
+outside of all EBSAs.
 
 
 Summarise.R
 -----------
-Summarises survery and presence data metrics calculated in GroupbyEBSA.R 
-* Only includes species listed as important for the EBSAs in Clark & Jamieson 2006 Phase II
-* Exports 2 summary tables: species abundance and presence and diveristy/richness
+Summarises the percent of presence and no data observations for each species by EBSA
 
-
-ProductivitybyEBSA.R
---------------------
-Summarises the productivity raster layers by EBSAs
-* Adds an attribute to the chlorophyll data that describes its position inside or outside each EBSA
-* Calculates the mean and stdev for mean chla and bloom frequencyfor each EBSA
-
+MapEBSAs.R
+----------
+Exports maps of species density and presence as well as and richness and diveristy 
+data aggregated by a 5km grid
 
 MapProductivity.R
 -----------------
 Exports maps of mean chla and bloom frequency with EBSA boundaries
-
-
-BoxPlots.R
-----------
-Creates boxplot figures for species abundance, diveristy, richness and productivity 
-for each EBSA
-* Only includes species listed as important for the EBSAs in Clark & Jamieson 2006 Phase II
-
-
-

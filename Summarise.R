@@ -8,10 +8,9 @@
 # Project:      NSB EBSA re-assessment
 #
 # Overview:
-# Summarises survery and presence data statistics
-# * Only includes species listed as important for the EBSAs in
-#   Clark & Jamieson 2006 Phase II
-# * Exports 2 summary tables: species abundance/presence and diveristy/richness
+# Summarises the percent of presence and no data observations for each species by EBSA
+# Only includes species listed as important for the EBSAs in 
+# Clark & Jamieson 2006 Phase II
 #
 ###############################################################################
 
