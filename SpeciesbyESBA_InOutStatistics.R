@@ -25,6 +25,7 @@ library(sp)
 # Go to parent directory
 setwd('..')
 
+
 # functions
 pPres <- function(x){
   length(x[x>0 & !is.na(x)])/length(x)
@@ -38,26 +39,14 @@ p0 <- function(x){
 
 
 # load data
-load(file="Aggregated/EBSA_Mean_Overlay.Rdata") #meanEBSA
+load(file="Aggregated/EBSA_Density_Overlay.Rdata") #densEBSA
 load(file="Aggregated/EBSA_Presence_Overlay.Rdata") #presEBSA
 
 
 #---------------------------------------------------------#
 
 # all important species
-species <- c("Abalone","Alcids","Ancient_Murrelet","Black_legged_Kittiwake","BlueWhale",
-             "Brandts_Cormorant","ButterSole","Cassins_Auklet","Common_Murre","DoverSole",
-             "DungenessCrab","EnglishSole","Eulachon","FinWhale","Fork_tailed_Storm_petrels",
-             "Geoduck","Glaucous_winged_Gull","GreenSturgeon","GreenUrchin","GreyWhale","Hake", 
-             "Halibut","Halibut_phma","Herring","Herring_Gulls","HerringSpawn","Humpback",
-             "KillerWhale","Leachs_Storm_petrels","Lingcod","Lingcod_phma","PacificCod",
-             "PacificOceanPerch","Pelagic_Cormorant","Phalaropes","Pigeon_Guillemot",
-             "Prawn","RedSeaCucumber","RedUrchin","Rhinoceros_Auklet","RockSole","Sablefish",
-             "Sablefish_phma","SandSole","Scoters","SeaOtterRange","SeiWhale","Shearwaters",
-             "Shrimp","Sooty_Shearwaters","SpermWhale","SpongeReef","StellarSeaLionRookeries",
-             "TannerCrab","Tufted_Puffin","WidowRockfish","YellowmouthRockfish","YellowtailRockfish",
-             "BlackRockfish","ChinaRockfish","CopperRockfish","QuillbackRockfish","TigerRockfish",
-             "YelloweyeRockfish")
+load("Scripts/Species")
 
 # ebsas
 ebsas <- c("HecateStraitFront","BellaBellaNearshore","BrooksPeninsula","CapeStJames",
@@ -67,18 +56,18 @@ ebsas <- c("HecateStraitFront","BellaBellaNearshore","BrooksPeninsula","CapeStJa
 
 #---------------------------------------------------------#
 
-## Survey Data ##
+## Density Data ##
 
 # empty list
-surveydat <- list()
+densdat <- list()
 
 # loop through each species in survey data
 for(s in species){
   # is the species present in the dataset
-  if( s %in% names(meanEBSA) ){
+  if( s %in% names(densEBSA) ){
     
     # aggregated data for species s
-    spdf <- meanEBSA[[s]]
+    spdf <- densEBSA[[s]]
 
     # add outside grid cells column
     out <- spdf@data[-1]
@@ -106,8 +95,9 @@ for(s in species){
       # Number of bootstrap samples
       nboot <- 10000
       # Generate bootstrap samples, i.e. an array of n x nboot 
-      n <- length(spdat)
-      tmpdata = sample(spdat,n*nboot, replace=TRUE)
+      rmna <- spdat[!is.na(spdat)]
+      n <- length(rmna)
+      tmpdata = sample(rmna,n*nboot, replace=TRUE)
       bootstrapsample = matrix(tmpdata, nrow=n, ncol=nboot)
       
       # Compute statistics of the bootstrap samples
@@ -132,12 +122,12 @@ for(s in species){
     }
     
     # add to list
-    surveydat[[s]] <- dat
+    densdat[[s]] <- dat
   }
 }
 
 # save survey data
-save(surveydat, file="Aggregated/EBSA_Survey_Statistics.Rdata")
+save(densdat, file="Aggregated/EBSA_Density_Statistics.Rdata")
 
 
 
@@ -179,8 +169,9 @@ for(s in species){
       # Number of bootstrap samples
       nboot <- 10000
       # Generate bootstrap samples, i.e. an array of n x nboot 
-      n <- length(spdat)
-      tmpdata = sample(spdat,n*nboot, replace=TRUE)
+      rmna <- spdat[!is.na(spdat)]
+      n <- length(rmna)
+      tmpdata = sample(rmna,n*nboot, replace=TRUE)
       bootstrapsample = matrix(tmpdata, nrow=n, ncol=nboot)
       
       # Compute statistics of the bootstrap samples

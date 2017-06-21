@@ -22,20 +22,11 @@ library(rgeos)
 setwd('..')
 
 
-# Speed up raster processes
-rasterOptions(chunksize = 1e+08, maxmemory = 1e+09)
-
 # Load boundary shapefile
 nsb <- readOGR(dsn="Boundary", layer="NSB")
 
-# load chla layer (includes straylight)
-chla <- raster("Data/Productivity/Chla_mean_nsb.tif")
-bloom <- raster("Data/Productivity/Bloom_freq_nsb.tif")
-
-# Conver to spatial points
-spchla <- rasterToPoints(chla, spatial=TRUE)
-spbloom <- rasterToPoints(bloom, spatial=TRUE)
-
+# load aggregated layer
+load("Aggregated/Grid_ProductivityData.Rdata") #prod
 
 # -------------------------------------------------#
 # List EBSA polygons
@@ -59,22 +50,19 @@ for(i in ebsalist[2:length(ebsalist)]){
 spdf <- spdf[,names(spdf) %in% "EBSA"]
 
 # match ebsa CRS (both albers but slight difference in no defs notation)
-proj4string(spchla) <- proj4string(spdf)
-proj4string(spbloom) <- proj4string(spdf)
+proj4string(spdf) <- proj4string(prod)
+
 
 
 # -------------------------------------------------#
-# Overlay
-
-# bloom layers
-dat <- c("spchla","spbloom")
+# Overlay by ebsa
 
 # empty list for loop
 prodEBSA <- list()
 # loop through each species in presence data
-for(s in dat){
+for(s in names(prod)){
   # get gridded data for s only
-  sp <- get(s)
+  sp <- prod[s]
   # empty list
   overlay <- list()
   # ebsas where species was listed as important

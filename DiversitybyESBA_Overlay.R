@@ -24,11 +24,8 @@ setwd('..')
 
 # -------------------------------------------------#
 # Load gridded data
-load(file="Aggregated/Survey_Mean.Rdata") #smean
+load(file="Aggregated/Grid_DiversityData.Rdata") #div
 
-# get richness and diversity variables
-div <- c("Div_Fish","Div_Invert","nSp_Fish","nSp_Invert")
-sdiv <- smean[names(smean) %in% div,]
 
 
 # -------------------------------------------------#
@@ -59,9 +56,9 @@ spdf <- spdf[,names(spdf) %in% "EBSA"]
 # empty list for loop
 divEBSA <- list()
 # loop through each species in presence data
-for(s in div){
+for(s in names(div)){
     # get gridded data for s only
-  spdiv <- smean[s]
+  spdiv <- div[s]
     # empty list
     overlay <- list()
     # ebsas where species was listed as important

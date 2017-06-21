@@ -74,8 +74,9 @@ for(s in names(comb)){
       # Number of bootstrap samples
       nboot <- 10000
       # Generate bootstrap samples, i.e. an array of n x nboot 
-      n <- length(spdat)
-      tmpdata = sample(spdat,n*nboot, replace=TRUE)
+      rmna <- spdat[!is.na(spdat)]
+      n <- length(rmna)
+      tmpdata = sample(rmna,n*nboot, replace=TRUE)
       bootstrapsample = matrix(tmpdata, nrow=n, ncol=nboot)
       
       # Compute statistics of the bootstrap samples

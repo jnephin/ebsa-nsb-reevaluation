@@ -27,7 +27,7 @@ setwd('..')
 #  presence data
 load("Aggregated/EBSA_Presence_Statistics.Rdata") #presdat
 #  survey data
-load("Aggregated/EBSA_Survey_Statistics.Rdata") #surveydat
+load("Aggregated/EBSA_Density_Statistics.Rdata") #densdat
 
 
 # -------------------------------------------------#
@@ -35,20 +35,20 @@ load("Aggregated/EBSA_Survey_Statistics.Rdata") #surveydat
 
 # Convert list to data.frame
 dfpres <- melt(presdat, id.vars=c("EBSA","stat"))
-dfsurvey <- melt(surveydat, id.vars=c("EBSA","stat"))
+dfdens <- melt(densdat, id.vars=c("EBSA","stat"))
 
 # re-name list column to species
 names(dfpres)[names(dfpres) == "L1"] <- "Species"
-names(dfsurvey)[names(dfsurvey) == "L1"] <- "Species"
+names(dfdens)[names(dfdens) == "L1"] <- "Species"
 
 # remove mean statistic from survey dataset
-dfsurvey <- dfsurvey[!dfsurvey$stat == "mean",]
-dfsurvey <- dfsurvey[dfsurvey$variable == "value",]
+dfdens <- dfdens[!dfdens$stat == "mean",]
+dfdens <- dfdens[dfdens$variable == "value",]
 dfpres <- dfpres[dfpres$variable == "value",]
 
 # combine datasets
-df <- rbind(dfsurvey, dfpres)
-df$DataType <- c(rep("Survey", nrow(dfsurvey)), rep("Presence", nrow(dfpres)))
+df <- rbind(dfdens, dfpres)
+df$DataType <- c(rep("Density", nrow(dfdens)), rep("Presence", nrow(dfpres)))
 
 # round values
 df$value <- round(df$value, 0)
@@ -62,5 +62,5 @@ castdf <- castdf[c("EBSA","DataType","Species","pPres","pNA")]
 colnames(castdf) <- c("EBSA","DataType","Species","Presence (%)","No Data (%)")
 
 # Export as csv
-write.csv(castdf, file= "Output/Tables/EBSA_Species_SummaryTable.csv", row.names=FALSE)
+write.csv(castdf, file= "Output/Tables/EBSA_DensityData_Summary.csv", row.names=FALSE)
 

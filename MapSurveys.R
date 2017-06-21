@@ -58,11 +58,16 @@ bcPoly <- spTransform( bcPoly, proj4string(nsb))
 
 # -------------------------------------------------#
 # Load EBSA in and outside polygons
-gdb <- "EBSA_Polygons/EBSAs_Overlay.gdb"
+gdb <- "EBSA_Polygons/EBSAs.gdb"
 ebsas <- ogrListLayers(gdb)
 
 # within only ebsas important for halibut
-ebsas <- c("CapeStJames","McIntyreBay")
+#ebsas <- c("CapeStJames","McIntyreBay")
+# ebsas
+ebsas <- c("HecateStraitFront","BellaBellaNearshore","BrooksPeninsula","CapeStJames",
+           "CentralMainland","ChathamSound","DogfishBank","HaidaGwaiiNearshore",
+           "LearmonthBank","McIntyreBay","NorthIslandsStraits","ScottIslands",
+           "ShelfBreak","SpongeReefs")
 
 # loop through each ebsa polygon
 # merge into one spatial polygon data frame
@@ -86,7 +91,7 @@ ext <- extent( iphc )
 lims <- list( x=c(ext@xmin, ext@xmax), y=c(ext@ymin, ext@ymax) )
 
 # Map
-pdf( file=file.path("Output/Surveys","Map_HalibutEBSAs.pdf"),
+pdf( file=file.path("Output/Maps/Surveys","Map_GroundfishSurveys.pdf"),
      height=6, width=5.25 )
 par(mar=c(1,1,1,1))
 plot( bcPoly, col = "grey40", border = NA, xlim = lims$x , ylim = lims$y )

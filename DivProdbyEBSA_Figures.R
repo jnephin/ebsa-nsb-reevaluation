@@ -35,17 +35,25 @@ dfdp <- melt(dpdat, id.vars=c("EBSA","mean","lower_CI","upper_CI"))
 # re-name list column to metric
 names(dfdp)[names(dfdp) == "L1"] <- "Metric"
 
+# -------------------------------------------------#
+# remove ebsas with limited data
+dfdp <- dfdp[!(dfdp$EBSA %in% c("BellaBellaNearshore","BrooksPeninsula",
+                              "CentralMainland","ChathamSound",
+                              "DogfishBank","LearmonthBank",
+                              "NorthIslandsStraits") &
+               dfdp$Metric %in% c("Div_Invert","Div_Fish",
+                                  "nSp_Fish","nSp_Invert")),]
 
 # -------------------------------------------------#
 # Reclass ebsa names to short names
 dfdp$EBSA[dfdp$EBSA == "BellaBellaNearshore"] <- " BB "
 dfdp$EBSA[dfdp$EBSA == "BrooksPeninsula"] <- " BP "
-dfdp$EBSA[dfdp$EBSA == "CapeStJames"] <- " CJ "
+dfdp$EBSA[dfdp$EBSA == "CapeStJames"] <- " CSJ "
 dfdp$EBSA[dfdp$EBSA == "CentralMainland"] <- " CM "
 dfdp$EBSA[dfdp$EBSA == "ChathamSound"] <- " CS "
 dfdp$EBSA[dfdp$EBSA == "DogfishBank"] <- " DB "
 dfdp$EBSA[dfdp$EBSA == "HaidaGwaiiNearshore"] <- " HG "
-dfdp$EBSA[dfdp$EBSA == "HecateStraitFront"] <- " HS "
+dfdp$EBSA[dfdp$EBSA == "HecateStraitFront"] <- " HSF "
 dfdp$EBSA[dfdp$EBSA == "LearmonthBank"] <- " LB "
 dfdp$EBSA[dfdp$EBSA == "McIntyreBay"] <- " MB "
 dfdp$EBSA[dfdp$EBSA == "NorthIslandsStraits"] <- " NIS "
@@ -64,8 +72,9 @@ dfdp$Metric[dfdp$Metric == "Div_Fish"] <- " Fish Diversity"
 dfdp$Metric[dfdp$Metric == "Div_Invert"] <- " Invert Diversity"
 dfdp$Metric[dfdp$Metric == "nSp_Fish"] <- " Fish Richness"
 dfdp$Metric[dfdp$Metric == "nSp_Invert"] <- " Invert Richness"
-dfdp$Metric[dfdp$Metric == "spchla"] <- "Mean Chla"
-dfdp$Metric[dfdp$Metric == "spbloom"] <- "Bloom frequency"
+dfdp$Metric[dfdp$Metric == "Chla_mean_nsb"] <- "Mean Chla"
+dfdp$Metric[dfdp$Metric == "Bloom_freq_nsb"] <- "Bloom frequency"
+
 
 
 # -------------------------------------------------#
@@ -101,5 +110,5 @@ spplot <- function(df, ylab, height, width, ncol, size=size){
 
 # -------------------------------------------------#
 # figure
-spplot(df=dfdp, ylab="", height = 7.5, width = 6.5, ncol = 2, size = 8)
+spplot(df=dfdp, ylab="", height = 5.8, width = 6.8, ncol = 2, size = 8)
 

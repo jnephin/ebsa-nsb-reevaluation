@@ -18,7 +18,7 @@
 library(ggplot2)
 library(reshape2)
 library(scales)
-
+library(rgdal)
 
 # Go to parent directory
 setwd('..')
@@ -27,69 +27,60 @@ setwd('..')
 # load data
 #  presence data
 load("Aggregated/EBSA_Presence_Statistics.Rdata") #presdat
-#  survey data
-load("Aggregated/EBSA_Survey_Statistics.Rdata") #surveydat
+#  density data
+load("Aggregated/EBSA_Density_Statistics.Rdata") #densdat
 
 
 
 # Convert list to data.frame
 dfpres <- melt(presdat, id.vars=c("EBSA","stat","value","lower_CI","upper_CI"))
-dfsurvey <- melt(surveydat, id.vars=c("EBSA","stat","value","lower_CI","upper_CI"))
+dfdens<- melt(densdat, id.vars=c("EBSA","stat","value","lower_CI","upper_CI"))
 
 
 # re-name list column to species
 names(dfpres)[names(dfpres) == "L1"] <- "Species"
-names(dfsurvey)[names(dfsurvey) == "L1"] <- "Species"
+names(dfdens)[names(dfdens) == "L1"] <- "Species"
 
 # subset survey data to only include stat == mean
-dfsurvey <- dfsurvey[dfsurvey$stat == "mean",]
+dfdens <- dfdens[dfdens$stat == "mean",]
 # subset presence data to only include stat == pPres
 dfpres <- dfpres[dfpres$stat == "pPres",]
 
 #---------------------------------------------------------#
 
 #  species by groups
-fish <- c("ButterSole","DoverSole","EnglishSole","Eulachon","GreenSturgeon",
-          "GreenUrchin","Hake", "Halibut","Halibut_phma","Herring","HerringSpawn",
-          "Lingcod","Lingcod_phma","PacificCod","PacificOceanPerch","RockSole",
-          "Sablefish","Sablefish_phma","SandSole","WidowRockfish","YellowmouthRockfish",
-          "YellowtailRockfish","BlackRockfish","ChinaRockfish","CopperRockfish",
-          "QuillbackRockfish","TigerRockfish","YelloweyeRockfish")
-birds <- c("Alcids","Ancient_Murrelet","Black_legged_Kittiwake","Brandts_Cormorant",
-           "Cassins_Auklet","Common_Murre","Fork_tailed_Storm_petrels",
-           "Glaucous_winged_Gull","Herring_Gulls","Leachs_Storm_petrels",
-           "Pelagic_Cormorant","Phalaropes","Pigeon_Guillemot","Rhinoceros_Auklet",
-           "Scoters","Shearwaters","Sooty_Shearwaters","Tufted_Puffin")
-mammals <- c("BlueWhale","FinWhale","GreyWhale","Humpback","KillerWhale",
-             "SeaOtterRange","SeiWhale","SpermWhale","StellarSeaLionRookeries")
-inverts <- c("Abalone","Geoduck","DungenessCrab","GreenUrchin","Prawn","RedSeaCucumber",
-             "RedUrchin","Shrimp","SpongeReef","TannerCrab")
-
+gdbs=c("Fish","MarineMammals","MarineBirds","Invert")
+groups <- NULL
+for(gdb in gdbs){
+  fc_list <- ogrListLayers(paste0("Data/",gdb,".gdb"))
+  assign(gdb, fc_list)
+}
 
 # -------------------------------------------------#
 # Add species groups
-for (d in c("dfpres", "dfsurvey")){
+for (d in c("dfpres", "dfdens")){
   df <- get(d)
   df$Group <- ""
-  df$Group[df$Species %in% fish] <- "Fish"
-  df$Group[df$Species %in% birds] <- "Birds"
-  df$Group[df$Species %in% mammals] <- "Mammals"
-  df$Group[df$Species %in% inverts] <- "Inverts"
+  df$Group[df$Species %in% Fish] <- "Fish"
+  df$Group[df$Species %in% MarineBirds] <- "Birds"
+  df$Group[df$Species %in% MarineMammals] <- "Cetaceans"
+  df$Group[df$Species %in% c(Invert,"SpongeReef",
+                             "StellarSeaLionRookeries","SeaOtterRange")] <- "Other"
   assign(d, df)
 }
 
 # -------------------------------------------------#
 # Reclass ebsa names to short names
-for (d in c("dfpres", "dfsurvey")){
+for (d in c("dfpres", "dfdens")){
   df <- get(d)
   df$EBSA[df$EBSA == "BellaBellaNearshore"] <- " BB "
   df$EBSA[df$EBSA == "BrooksPeninsula"] <- " BP "
-  df$EBSA[df$EBSA == "CapeStJames"] <- " CJ "
+  df$EBSA[df$EBSA == "CapeStJames"] <- " CSJ "
   df$EBSA[df$EBSA == "CentralMainland"] <- " CM "
   df$EBSA[df$EBSA == "ChathamSound"] <- " CS "
   df$EBSA[df$EBSA == "DogfishBank"] <- " DB "
   df$EBSA[df$EBSA == "HaidaGwaiiNearshore"] <- " HG "
-  df$EBSA[df$EBSA == "HecateStraitFront"] <- " HS "
+  df$EBSA[df$EBSA == "HecateStraitFront"] <- " HSF "
   df$EBSA[df$EBSA == "LearmonthBank"] <- " LB "
   df$EBSA[df$EBSA == "McIntyreBay"] <- " MB "
   df$EBSA[df$EBSA == "NorthIslandsStraits"] <- " NIS "
@@ -106,20 +97,18 @@ for (d in c("dfpres", "dfsurvey")){
 # -------------------------------------------------#
 # Reclass brid names to short names
 
-dfsurvey$Species[dfsurvey$Species == "Ancient_Murrelet"] <- "Murrelet"
-dfsurvey$Species[dfsurvey$Species == "Black_legged_Kittiwake"] <- "Kittiwake"
-dfsurvey$Species[dfsurvey$Species == "Brandts_Cormorant"] <- "B. Cormorant"
-dfsurvey$Species[dfsurvey$Species == "Cassins_Auklet"] <- "C. Auklet"
-dfsurvey$Species[dfsurvey$Species == "Common_Murre"] <- "Common Murre"
-dfsurvey$Species[dfsurvey$Species == "Fork_tailed_Storm_petrels"] <- "F.T. Storm Petrels"
-dfsurvey$Species[dfsurvey$Species == "Glaucous_winged_Gull"] <- "G.W. Gull"
-dfsurvey$Species[dfsurvey$Species == "Herring_Gulls"] <- "Herring Gulls"
-dfsurvey$Species[dfsurvey$Species == "Leachs_Storm_petrels"] <- "L. Storm Petrels"
-dfsurvey$Species[dfsurvey$Species == "Pelagic_Cormorant"] <- "P. Cormorant"
-dfsurvey$Species[dfsurvey$Species == "Pigeon_Guillemot"] <- "Pigeon Guillemot"
-dfsurvey$Species[dfsurvey$Species == "Rhinoceros_Auklet"] <- "R. Auklet"
-dfsurvey$Species[dfsurvey$Species == "Tufted_Puffin"] <- "Tufted Puffin"
-
+dfdens$Species <- gsub("_"," ", dfdens$Species)
+dfdens$Species <- gsub("rockfish","RF", dfdens$Species)
+dfdens$Species[dfdens$Species == "Black footed Albatross"] <- "Albatross"
+dfdens$Species[dfdens$Species == "Cassins Auklet"] <- "C. Auklet"
+dfdens$Species[dfdens$Species == "Fork tailed Storm petrel"] <- "F.T. Storm Petrels"
+dfdens$Species[dfdens$Species == "Large_Gulls"] <- "Large Gulls"
+dfdens$Species[dfdens$Species == "Leachs Storm petrel"] <- "L. Storm Petrels"
+dfdens$Species[dfdens$Species == "Red necked Phalarope"] <- "Phalarope"
+dfdens$Species[dfdens$Species == "Rhinoceros Auklet"] <- "R. Auklet"
+dfdens$Species[dfdens$Species == "Tufted Puffin"] <- "Tufted Puffin"
+dfdens$Species[dfdens$Species == "Pacific Ocean perch"] <- "P.O. perch"
+dfdens$Species[dfdens$Species == "Yelloweye line"] <- "Yelloweye RF line"
 
 
 # -------------------------------------------------#
@@ -156,15 +145,15 @@ spplot <- function(df, grp, ylab, height, width, ncol, size=size){
 # -------------------------------------------------#
 # figures
 # fish
-spplot(df=dfsurvey, grp="Fish", ylab="Mean Density", 
+spplot(df=dfdens, grp="Fish", ylab="Mean Density", 
        height = 7.5, width = 6, ncol = 4, size = 8)
 # birds
-spplot(df=dfsurvey, grp="Birds", ylab="Mean Density", 
-       height = 5.5, width = 4, ncol = 3, size = 8)
+spplot(df=dfdens, grp="Birds", ylab="Mean Density", 
+       height = 6.8, width = 4.5, ncol = 3, size = 8)
 # mammals
-spplot(df=dfpres, grp="Mammals", ylab="Prevalence (%)", 
-       height = 4.5, width = 4, ncol = 2, size = 8)
+spplot(df=dfdens, grp="Cetaceans", ylab="Mean Density", 
+       height = 4, width = 4.5, ncol = 2, size = 8)
 # inverts
-spplot(df=dfpres, grp="Inverts", ylab="Prevalence (%)", 
-       height = 5.5, width = 3, ncol = 2, size = 8)
+spplot(df=dfpres, grp="Other", ylab="Prevalence (%)", 
+       height = 5, width = 5.2, ncol = 3, size = 8)
 
