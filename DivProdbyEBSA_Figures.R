@@ -78,10 +78,10 @@ dfdp$Area[dfdp$EBSA == "OUT"] <- "Out"
 # -------------------------------------------------#
 # Reclass Metric names to short names
 
-dfdp$Metric[dfdp$Metric == "Div_Fish"] <- " Fish Diversity"
-dfdp$Metric[dfdp$Metric == "Div_Invert"] <- " Invert Diversity"
-dfdp$Metric[dfdp$Metric == "nSp_Fish"] <- " Fish Richness"
-dfdp$Metric[dfdp$Metric == "nSp_Invert"] <- " Invert Richness"
+dfdp$Metric[dfdp$Metric == "Div_Fish"] <- "Fish Diversity"
+dfdp$Metric[dfdp$Metric == "Div_Invert"] <- "Invert Diversity"
+dfdp$Metric[dfdp$Metric == "nSp_Fish"] <- "Fish Richness"
+dfdp$Metric[dfdp$Metric == "nSp_Invert"] <- "Invert Richness"
 dfdp$Metric[dfdp$Metric == "Chla_mean_nsb"] <- "Mean Chla"
 dfdp$Metric[dfdp$Metric == "Bloom_freq_nsb"] <- "Bloom frequency"
 

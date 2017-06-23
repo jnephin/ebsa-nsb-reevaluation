@@ -9,7 +9,7 @@
 #
 # Overview:
 # Exports maps of species abundance/presence and richness/diveristy data
-# aggregate by grid
+# aggregate by grid with an inset plot showing the mean metric by ebsa
 #
 ###############################################################################
 
@@ -26,7 +26,7 @@ setwd('..')
 
 
 # -------------------------------------------------#
-# Load EBSA in and outside polygons
+# Load EBSA polygons
 gdb <- "EBSA_Polygons/EBSAs.gdb"
 ebsas <- ogrListLayers(gdb)
 
@@ -42,6 +42,26 @@ for(i in ebsas[2:length(ebsas)]){
 # Convert to spatial polygons (i.e., drop the data)
 spdf <- as( spdf, "SpatialPolygons" )
 # -------------------------------------------------#
+
+# -------------------------------------------------#
+# Reclass ebsa names to short names
+dfdp$EBSA[dfdp$EBSA == "BellaBellaNearshore"] <- " BB "
+dfdp$EBSA[dfdp$EBSA == "BrooksPeninsula"] <- " BP "
+dfdp$EBSA[dfdp$EBSA == "CapeStJames"] <- " CSJ "
+dfdp$EBSA[dfdp$EBSA == "CentralMainland"] <- " CM "
+dfdp$EBSA[dfdp$EBSA == "ChathamSound"] <- " CS "
+dfdp$EBSA[dfdp$EBSA == "DogfishBank"] <- " DB "
+dfdp$EBSA[dfdp$EBSA == "HaidaGwaiiNearshore"] <- " HG "
+dfdp$EBSA[dfdp$EBSA == "HecateStraitFront"] <- " HSF "
+dfdp$EBSA[dfdp$EBSA == "LearmonthBank"] <- " LB "
+dfdp$EBSA[dfdp$EBSA == "McIntyreBay"] <- " MB "
+dfdp$EBSA[dfdp$EBSA == "NorthIslandsStraits"] <- " NIS "
+dfdp$EBSA[dfdp$EBSA == "ScottIslands"] <- " SI "
+dfdp$EBSA[dfdp$EBSA == "ShelfBreak"] <- " SB "
+dfdp$EBSA[dfdp$EBSA == "SpongeReefs"] <- " SR "
+dfdp$EBSA[dfdp$EBSA == "Outside"] <- "OUT"
+dfdp$Area <- "In"
+dfdp$Area[dfdp$EBSA == "OUT"] <- "Out"
 
 
 
@@ -102,7 +122,8 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
   
   # layers in both grid and df data
   gridlayers <- unique(names(griddata))
-  dflayers <- unique(df$Species)
+  if(type == "Presence" | type == "Density") dflayers <- unique(df$Species)
+  if(type == "Diversity" | type == "Productivity") dflayers <- unique(df$Metric)
   layers <- dflayers[dflayers %in% gridlayers]
   
   # loop through layers
@@ -188,6 +209,8 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
                                  axis.text = element_text(size=size, colour = "black"),
                                  axis.title = element_text(size=size+1, colour = "black"),
                                  plot.margin = unit(c(1,1,1,1), "lines"))
+    if(type=="Diversity" | type=="Productivity") insetfig <- insetfig + 
+      theme(axis.text.x = element_text(size=size, colour = "black", angle = 90, vjust=0.5, hjust=1))
     
     #A viewport taking up a fraction of the plot area
     vp <- viewport(width = 0.58, height = 0.4, x = 1, y = 1, just=c(1,1))
