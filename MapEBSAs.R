@@ -68,53 +68,51 @@ bcPoly <- spTransform( bcPoly, proj4string(nsb))
 load(file="Aggregated/Grid_DensityData.Rdata") #dens
 load(file="Aggregated/Grid_PresenceData.Rdata") #pres
 load(file="Aggregated/Grid_DiversityData.Rdata") #div
+load(file="Aggregated/Grid_ProductivityData.Rdata") #prod
 
-# all important species
-load("Scripts/Species")
 
 # Reclass species names to common names
-for (d in c("dens", "pres", "div")){
+for (d in c("dens", "pres", "div", "prod")){
   df <- get(d)
-  names(df)[names(df) == "Hippoglossus_stenolepis"] <- "Halibut"
   names(df) <- gsub("_"," ", names(df))
   names(df) <- gsub("rockfish","RF", names(df))
-  names(df)[names(df) == "Black footed Albatross"] <- "Albatross"
-  names(df)[names(df) == "Cassins Auklet"] <- "C. Auklet"
-  names(df)[names(df) == "Fork tailed Storm petrel"] <- "F.T. Storm Petrels"
-  names(df)[names(df) == "Large_Gulls"] <- "Large Gulls"
-  names(df)[names(df) == "Leachs Storm petrel"] <- "L. Storm Petrels"
-  names(df)[names(df) == "Red necked Phalarope"] <- "Phalarope"
-  names(df)[names(df) == "Rhinoceros Auklet"] <- "R. Auklet"
-  names(df)[names(df) == "Tufted Puffin"] <- "Tufted Puffin"
-  names(df)[names(df) == "Pacific Ocean perch"] <- "P.O. perch"
+  names(df)[names(df) == "Fork tailed Storm petrel"] <- "Fork-tailed Storm-petrel"
+  names(df)[names(df) == "Leachs Storm petrel"] <- "Leach's Storm petrel"
+  names(df)[names(df) == "Red necked Phalarope"] <- "Red-necked Phalarope"
   names(df)[names(df) == "Yelloweye line"] <- "Yelloweye RF line"
-  names(df)[names(df) == "Alcidae"] <- "Alcids"
-  names(df)[names(df) == "Phalaropus"] <- "Phalaropes"
-  names(df)[names(df) == "Div_Fish"] <- "Fish Diversity"
-  names(df)[names(df) == "Div_Invert"] <- "Invert Diversity"
-  names(df)[names(df) == "nSp_Fish"] <- "Fish Richness"
-  names(df)[names(df) == "nSp_Invert"] <- "Invert Richness"
+  names(df)[names(df) == "Div Fish"] <- "Fish Diversity"
+  names(df)[names(df) == "Div Invert"] <- "Invert Diversity"
+  names(df)[names(df) == "nSp Fish"] <- "Fish Richness"
+  names(df)[names(df) == "nSp Invert"] <- "Invert Richness"
+  names(df)[names(df) == "Chla mean nsb"] <- "Mean Chla"
+  names(df)[names(df) == "Bloom freq nsb"] <- "Bloom frequency"
   assign(d, df)
 }
 
 
 # -------------------------------------------------#
-
-
+# Load data for inset figure 
+load("Aggregated/Denisty_PlotData.Rdata") #dfdens
+load("Aggregated/Presence_PlotData.Rdata") #dfpres
+load("Aggregated/DivProd_PlotData.Rdata") #dfdp
 
 # -------------------------------------------------#
 # Map function
-MapLayers <- function( griddata, layers, dir, type, style="kmeans"){
-
+MapLayers <- function( griddata, df, type, style="kmeans", size=8){
+  
+  # layers in both grid and df data
+  gridlayers <- unique(names(griddata))
+  dflayers <- unique(df$Species)
+  layers <- dflayers[dflayers %in% gridlayers]
+  
   # loop through layers
-  layers <- unique(names(griddata))
   for(p in layers){
-
+    
     # Keep only attribute to plot
     Layer <- griddata[p]
-
+    
     # Set colour scale
-    if( type == "presence" ){ #If factor
+    if( type == "Presence" ){ #If factor
       # colour
       colours <- c("#3288BD","#D53E4F")
       # combine colours and unique factor levels
@@ -123,6 +121,8 @@ MapLayers <- function( griddata, layers, dir, type, style="kmeans"){
       colnames(pal) <- c( p, "colours" )
       # break labels
       pal$labels <- as.character( brks )
+      pal$labels[ pal$labels == "0"] <- "Absence"
+      pal$labels[ pal$labels == "1"] <- "Presence"
       # merge colours with layer data
       Layer <- sp::merge( Layer, pal )
     } else { # If continuous
@@ -155,31 +155,82 @@ MapLayers <- function( griddata, layers, dir, type, style="kmeans"){
       Layer@data$labels <- labels
       Layer <- sp::merge( Layer, pal, by = "labels")
     }
-
+    
     # Get the vertical and horizontal limits
     ext <- extent( Layer )
     # Get x and y limits
-    lims <- list( x=c(ext@xmin, ext@xmax), y=c(ext@ymin, ext@ymax*.98) )
-
-    # Map
-    tiff(file=file.path("Output/Maps", dir, paste0(p, ".tif")),
+    lims <- list( x=c(ext@xmin*1.15, ext@xmax), y=c(ext@ymin, ext@ymax*.98) )
+    
+    # subset by species
+    if(type == "Presence" | type == "Density") dfsub <- df[df$Species == p,]
+    if(type == "Diversity" | type == "Productivity") dfsub <- df[df$Metric == p,]
+      
+    #y-axis limit and breaks
+    brks <- pretty( c(dfsub$value,dfsub$lower_CI,dfsub$upper_CI), n=4 )
+    if(max(brks) > max(dfsub$upper_CI, na.rm=T))  brks <- brks[-length(brks)]
+    
+    # plot
+    insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
+    insetfig <- insetfig + geom_point(pch=16)
+    insetfig <- insetfig + geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)
+    if(type == "Presence"){
+      insetfig <- insetfig + labs(x="", y="Occurrence (%)")
+    } else {
+      insetfig <- insetfig + labs(x="", y="Mean Density")
+    }
+    insetfig <- insetfig + scale_y_continuous(breaks = brks)
+    insetfig <- insetfig + theme(plot.background = element_blank(),
+                                 panel.border = element_blank(),
+                                 panel.background = element_rect(fill=NA,colour="black"),
+                                 axis.ticks = element_line(colour="black"),
+                                 panel.grid= element_blank(),
+                                 axis.ticks.length = unit(0.1,"cm"),
+                                 axis.text = element_text(size=size, colour = "black"),
+                                 axis.title = element_text(size=size+1, colour = "black"),
+                                 plot.margin = unit(c(1,1,1,1), "lines"))
+    
+    #A viewport taking up a fraction of the plot area
+    vp <- viewport(width = 0.58, height = 0.4, x = 1, y = 1, just=c(1,1))
+    
+    # legend title
+    if(type == "Presence"){
+      ltitle <- ""
+    } else if(type == "Density") {
+      ltitle <- "Mean Density"
+    } else if( p == "Invert Richness" | p == "Fish Richness") {
+      ltitle <- "Number of species"
+    } else if( p == "Invert Diversity" | p == "Fish Diversity") {
+      ltitle <- "Shannon's H'"
+    }  else if( p == "Mean Chla") {
+      ltitle <- "Mean Chlorophyll a\n (mg m-3)"
+    }  else if( p == "Bloom frequency") {
+      ltitle <- "Frequency of monthly\n plankton blooms"
+    }
+    
+    # Export Figure
+    tiff(file=file.path("Output/Maps", type, paste0(p, ".tif")),
          width = 4.8 , height = 5.25, units = "in", res = 300,
          compression = "lzw")
     par(mar=c(1,1,1,1))
-    plot( Layer, col=Layer$colours, border=NA, xlim = lims$x , ylim = lims$y )
-    box( lty = 'solid', col = 'black')
-    plot( bcPoly, col = "grey40", border = NA, add = T )
-    plot( spdf, add=T )
+    plot( bcPoly, col = "grey60", border = NA, xlim = lims$x , ylim = lims$y)
+    plot( Layer, col=Layer$colours, border=NA, add = T )
+    plot( spdf, add=T, lwd=.7)
     legend( "bottomleft", legend = pal$labels, fill = pal$colours,
-            title = p, bg = NA, box.col = NA)
+            title = ltitle, bg = NA, box.col = NA, cex = .8, pt.cex=3, border=NA)
+    title(p, adj=.05, cex.main = 1 )
+    print(insetfig, vp = vp)
+    box( lty = 'solid', col = 'black')
     dev.off()
-
+    
   } # end loop through layers
 } # End MapLayers function
 # -------------------------------------------------#
 
 
-# Map
-MapLayers( griddata = dens, layers = species, dir = "Density", type = "density")
-MapLayers( griddata = pres, layers = species, dir = "Presence", type = "presence")
-MapLayers( griddata = div, layers = species, dir = "Diversity", type = "diversity")
+
+# Maps
+MapLayers( griddata = dens, df=dfdens, type = "Density")
+MapLayers( griddata = pres, df=dfpres,  type = "Presence")
+MapLayers( griddata = div, df=dfdp, type = "Diversity")
+MapLayers( griddata = prod, df=dfdp, type = "Productivity")
+

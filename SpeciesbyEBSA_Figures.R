@@ -36,11 +36,16 @@ load("Aggregated/EBSA_Density_Statistics.Rdata") #densdat
 dfpres <- melt(presdat, id.vars=c("EBSA","stat","value","lower_CI","upper_CI"))
 dfdens<- melt(densdat, id.vars=c("EBSA","stat","value","lower_CI","upper_CI"))
 
-
 # re-name list column to species
 names(dfpres)[names(dfpres) == "L1"] <- "Species"
 names(dfdens)[names(dfdens) == "L1"] <- "Species"
 
+# add missing data column
+dfNA <- dfdens[dfdens$stat == "pNA",c("EBSA","Species","value")]
+colnames(dfNA)[3] <- "pNA" 
+dfNA$pData <- round(100 - dfNA$pNA)
+dfdens <- merge(dfdens, dfNA, by=c("EBSA","Species"))
+  
 # subset survey data to only include stat == mean
 dfdens <- dfdens[dfdens$stat == "mean",]
 # subset presence data to only include stat == pPres
@@ -99,27 +104,56 @@ for (d in c("dfpres", "dfdens")){
 
 dfdens$Species <- gsub("_"," ", dfdens$Species)
 dfdens$Species <- gsub("rockfish","RF", dfdens$Species)
-dfdens$Species[dfdens$Species == "Black footed Albatross"] <- "Albatross"
-dfdens$Species[dfdens$Species == "Cassins Auklet"] <- "C. Auklet"
-dfdens$Species[dfdens$Species == "Fork tailed Storm petrel"] <- "F.T. Storm Petrels"
-dfdens$Species[dfdens$Species == "Large_Gulls"] <- "Large Gulls"
-dfdens$Species[dfdens$Species == "Leachs Storm petrel"] <- "L. Storm Petrels"
-dfdens$Species[dfdens$Species == "Red necked Phalarope"] <- "Phalarope"
-dfdens$Species[dfdens$Species == "Rhinoceros Auklet"] <- "R. Auklet"
-dfdens$Species[dfdens$Species == "Tufted Puffin"] <- "Tufted Puffin"
-dfdens$Species[dfdens$Species == "Pacific Ocean perch"] <- "P.O. perch"
+dfdens$Species[dfdens$Species == "Fork tailed Storm petrel"] <- "Fork-tailed Storm-petrel"
+dfdens$Species[dfdens$Species == "Leachs Storm petrel"] <- "Leach's Storm petrel"
+dfdens$Species[dfdens$Species == "Red necked Phalarope"] <- "Red-necked Phalarope"
 dfdens$Species[dfdens$Species == "Yelloweye line"] <- "Yelloweye RF line"
 
 
-# -------------------------------------------------#
-# plotting function
+# Save dfpres and dfdens to plot with maps
+save(dfdens, file="Aggregated/Denisty_PlotData.Rdata")
+save(dfpres, file="Aggregated/Presence_PlotData.Rdata")
 
-spplot <- function(df, grp, ylab, height, width, ncol, size=size){
+# -------------------------------------------------#
+# plotting functions
+
+densplot <- function(df, grp, ylab, height, width, ncol, size=size){
+  # subset by species
+  dfsub <- df[df$Group == grp,]
+  # plot
+  gfig <- ggplot(data = dfsub, aes(x=EBSA,y=value,colour=Area, size=pData))+
+    geom_point(pch=16)+
+    geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)+
+    labs(x="", y=ylab)+
+    scale_y_continuous(breaks = pretty_breaks(n=4))+
+    scale_size_area(max_size = 3, name = "Data \ncoverage\n (%)")+
+    facet_wrap(~Species, scales="free", ncol=ncol)+
+    scale_colour_manual(values=c("#7fc97f","#386cb0"), guide=F)+
+    theme(panel.border = element_rect(fill=NA, colour="black"),
+          panel.background = element_rect(fill="white",colour="black"),
+          strip.background = element_rect(fill="white",colour=NA),
+          strip.text = element_text(size=size+1, colour = "black", hjust=0, vjust=1),
+          axis.ticks = element_line(colour="black"),
+          panel.grid= element_blank(),
+          axis.ticks.length = unit(0.1,"cm"),
+          axis.text = element_text(size=size, colour = "black"),
+          axis.title = element_text(size=size+1, colour = "black"),
+          panel.spacing = unit(0.1, "lines"),
+          legend.key = element_blank(),
+          plot.margin = unit(c(.2,.2,.2,.2), "lines"))
+  tiff(file=file.path("Output/Figures", paste0(grp, ".tif")),
+       width = width , height = height, units = "in", res = 100)
+  print(gfig)
+  dev.off()
+}
+
+
+presplot <- function(df, grp, ylab, height, width, ncol, size=size){
   # subset by species
   dfsub <- df[df$Group == grp,]
   # plot
   gfig <- ggplot(data = dfsub, aes(x=EBSA,y=value,colour=Area))+
-    geom_point(pch=16, size=2)+
+    geom_point(pch=16)+
     geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)+
     labs(x="", y=ylab)+
     scale_y_continuous(breaks = pretty_breaks(n=4))+
@@ -142,18 +176,19 @@ spplot <- function(df, grp, ylab, height, width, ncol, size=size){
   dev.off()
 }
 
+
 # -------------------------------------------------#
 # figures
 # fish
-spplot(df=dfdens, grp="Fish", ylab="Mean Density", 
-       height = 7.5, width = 6, ncol = 4, size = 8)
+densplot(df=dfdens, grp="Fish", ylab="Mean Density", 
+       height = 8.5, width = 7, ncol = 4, size = 8)
 # birds
-spplot(df=dfdens, grp="Birds", ylab="Mean Density", 
-       height = 6.8, width = 4.5, ncol = 3, size = 8)
+densplot(df=dfdens, grp="Birds", ylab="Mean Density", 
+       height = 6.8, width = 5.5, ncol = 3, size = 8)
 # mammals
-spplot(df=dfdens, grp="Cetaceans", ylab="Mean Density", 
-       height = 4, width = 4.5, ncol = 2, size = 8)
+densplot(df=dfdens, grp="Cetaceans", ylab="Mean Density", 
+       height = 4, width = 5.5, ncol = 2, size = 8)
 # inverts
-spplot(df=dfpres, grp="Other", ylab="Prevalence (%)", 
+presplot(df=dfpres, grp="Other", ylab="Prevalence (%)", 
        height = 5, width = 5.2, ncol = 3, size = 8)
 

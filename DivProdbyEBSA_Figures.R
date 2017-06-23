@@ -29,20 +29,30 @@ load("Aggregated/EBSA_DivProd_Statistics.Rdata") #dpdat
 
 
 # Convert list to data.frame
-dfdp <- melt(dpdat, id.vars=c("EBSA","mean","lower_CI","upper_CI"))
+dfdp <- melt(dpdat, id.vars=c("EBSA","stat","lower_CI","upper_CI"))
 
 
 # re-name list column to metric
 names(dfdp)[names(dfdp) == "L1"] <- "Metric"
 
+
+# add missing data column
+dfNA <- dfdp[dfdp$stat == "pNA",c("EBSA","Metric","value")]
+colnames(dfNA)[3] <- "pNA" 
+dfNA$pData <- round(100 - dfNA$pNA)
+dfdp <- merge(dfdp, dfNA, by=c("EBSA","Metric"))
+
+# subset survey data to only include stat == mean
+dfdp <- dfdp[dfdp$stat == "mean",]
+
 # -------------------------------------------------#
 # remove ebsas with limited data
 dfdp <- dfdp[!(dfdp$EBSA %in% c("BellaBellaNearshore","BrooksPeninsula",
-                              "CentralMainland","ChathamSound",
-                              "DogfishBank","LearmonthBank",
-                              "NorthIslandsStraits") &
-               dfdp$Metric %in% c("Div_Invert","Div_Fish",
-                                  "nSp_Fish","nSp_Invert")),]
+                                "CentralMainland","ChathamSound",
+                                "DogfishBank","LearmonthBank",
+                                "NorthIslandsStraits") &
+                 dfdp$Metric %in% c("Div_Invert","Div_Fish",
+                                    "nSp_Fish","nSp_Invert")),]
 
 # -------------------------------------------------#
 # Reclass ebsa names to short names
@@ -76,18 +86,20 @@ dfdp$Metric[dfdp$Metric == "Chla_mean_nsb"] <- "Mean Chla"
 dfdp$Metric[dfdp$Metric == "Bloom_freq_nsb"] <- "Bloom frequency"
 
 
+# Save dfdp to plot with maps
+save(dfdp, file="Aggregated/DivProd_PlotData.Rdata")
 
 # -------------------------------------------------#
 # plotting function
 
 spplot <- function(df, ylab, height, width, ncol, size=size){
-  # plot
-  gfig <- ggplot(data = df, aes(x=EBSA,y=mean,colour=Area))+
-    geom_point(pch=16, size=2)+
+  gfig <- ggplot(data = df, aes(x=EBSA,y=value,colour=Area, size=pData))+
+    geom_point(pch=16)+
     geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)+
     labs(x="", y=ylab)+
     scale_y_continuous(breaks = pretty_breaks(n=4))+
     facet_wrap(~Metric, scales="free", ncol=ncol)+
+    scale_size_area(max_size = 3, name = "Data \ncoverage\n (%)")+
     scale_colour_manual(values=c("#7fc97f","#386cb0"), guide=F)+
     theme(panel.border = element_rect(fill=NA, colour="black"),
           panel.background = element_rect(fill="white",colour="black"),
@@ -99,6 +111,7 @@ spplot <- function(df, ylab, height, width, ncol, size=size){
           axis.text = element_text(size=size, colour = "black"),
           axis.title = element_text(size=size+1, colour = "black"),
           panel.spacing = unit(0.1, "lines"),
+          legend.key = element_blank(),
           plot.margin = unit(c(.2,.2,.2,.2), "lines"))
   tiff("Output/Figures/Diversity_Productivity.tif",
        width = width , height = height, units = "in", res = 100)
@@ -110,5 +123,5 @@ spplot <- function(df, ylab, height, width, ncol, size=size){
 
 # -------------------------------------------------#
 # figure
-spplot(df=dfdp, ylab="", height = 5.8, width = 6.8, ncol = 2, size = 8)
+spplot(df=dfdp, ylab="", height = 5.8, width = 7, ncol = 2, size = 8)
 

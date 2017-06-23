@@ -25,6 +25,11 @@ library(sp)
 setwd('..')
 
 
+# functions
+pNA <- function(x){
+  length(x[is.na(x)])/length(x)
+}
+
 # load data
 load(file="Aggregated/EBSA_Diversity_Overlay.Rdata") #divEBSA
 load(file="Aggregated/EBSA_Productivity_Overlay.Rdata") #prodEBSA
@@ -70,6 +75,7 @@ for(s in names(comb)){
       
       # Compute statistics of sample data
       sp_mean <- mean(spdat, na.rm=TRUE)
+      sp_pNA <- pNA(spdat)*100
       
       # Number of bootstrap samples
       nboot <- 10000
@@ -81,13 +87,19 @@ for(s in names(comb)){
       
       # Compute statistics of the bootstrap samples
       boot_mean <- apply(bootstrapsample, 2, mean, na.rm=TRUE)
+      boot_pNA <- apply(bootstrapsample, 2, pNA) * 100
       
       # Find the 0.05 and 0.95 quantile for each statistic
       # 95% CI using the percentile method
       q_mean = quantile(boot_mean, c(0.025, 0.975), na.rm=TRUE)
+      q_pNA = quantile(boot_pNA, c(0.025, 0.975), na.rm=TRUE)
       
       # Bind together
-      df <- data.frame(EBSA = e, mean = sp_mean, lower_CI = q_mean[1], upper_CI = q_mean[2],
+      stats <- c(sp_mean,sp_pNA)
+      lower <- c(q_mean[1],q_pNA[1])
+      upper <-c(q_mean[2],q_pNA[2])
+      df <- data.frame(EBSA = e, stat = c("mean","pNA"),
+                       value = stats,lower_CI = lower, upper_CI = upper,
                        stringsAsFactors = FALSE)
       dat <- rbind(dat, df)
     }
