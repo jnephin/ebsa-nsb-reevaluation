@@ -15,14 +15,14 @@ Before running the scripts:
 GroupbyGrid.R
 -------------
 Aggregates by grid cell
-* Calculates mean and sd per grid cell for density data
-* Calculates presence of points within grid cell for presence and polygon data
+* Calculates mean grid cell for density, diversity and productivity data
+* Calculates presence of points within grid cell for presence only and polygon layers
 
 
 SpeciesbyEBSA_Overlay.R
 -----------------------
-Performs spatial overlay for each species. Adds an inside or outside attribute
-for each cell for each of the relavant EBSAs.
+Assigns species to EBSAs based on IA info and reports. Performs spatial overlay for each 
+species. Adds an inside or outside attribute for each cell for each of the relavant EBSAs.
 
 SpeciesbyEBSA_InOutStatistics.R
 -------------------------------

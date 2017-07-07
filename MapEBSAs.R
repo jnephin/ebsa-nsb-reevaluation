@@ -20,6 +20,8 @@ library(raster)
 library(rgeos)
 library(classInt)
 library(RColorBrewer)
+library(ggplot2)
+library(grid)
 
 # Go to parent directory
 setwd('..')
@@ -42,27 +44,6 @@ for(i in ebsas[2:length(ebsas)]){
 # Convert to spatial polygons (i.e., drop the data)
 spdf <- as( spdf, "SpatialPolygons" )
 # -------------------------------------------------#
-
-# -------------------------------------------------#
-# Reclass ebsa names to short names
-dfdp$EBSA[dfdp$EBSA == "BellaBellaNearshore"] <- " BB "
-dfdp$EBSA[dfdp$EBSA == "BrooksPeninsula"] <- " BP "
-dfdp$EBSA[dfdp$EBSA == "CapeStJames"] <- " CSJ "
-dfdp$EBSA[dfdp$EBSA == "CentralMainland"] <- " CM "
-dfdp$EBSA[dfdp$EBSA == "ChathamSound"] <- " CS "
-dfdp$EBSA[dfdp$EBSA == "DogfishBank"] <- " DB "
-dfdp$EBSA[dfdp$EBSA == "HaidaGwaiiNearshore"] <- " HG "
-dfdp$EBSA[dfdp$EBSA == "HecateStraitFront"] <- " HSF "
-dfdp$EBSA[dfdp$EBSA == "LearmonthBank"] <- " LB "
-dfdp$EBSA[dfdp$EBSA == "McIntyreBay"] <- " MB "
-dfdp$EBSA[dfdp$EBSA == "NorthIslandsStraits"] <- " NIS "
-dfdp$EBSA[dfdp$EBSA == "ScottIslands"] <- " SI "
-dfdp$EBSA[dfdp$EBSA == "ShelfBreak"] <- " SB "
-dfdp$EBSA[dfdp$EBSA == "SpongeReefs"] <- " SR "
-dfdp$EBSA[dfdp$EBSA == "Outside"] <- "OUT"
-dfdp$Area <- "In"
-dfdp$Area[dfdp$EBSA == "OUT"] <- "Out"
-
 
 
 # -------------------------------------------------#
@@ -95,17 +76,24 @@ load(file="Aggregated/Grid_ProductivityData.Rdata") #prod
 for (d in c("dens", "pres", "div", "prod")){
   df <- get(d)
   names(df) <- gsub("_"," ", names(df))
-  names(df) <- gsub("rockfish","RF", names(df))
   names(df)[names(df) == "Fork tailed Storm petrel"] <- "Fork-tailed Storm-petrel"
   names(df)[names(df) == "Leachs Storm petrel"] <- "Leach's Storm petrel"
+  names(df)[names(df) == "Cassins Auklet"] <- "Cassin's Auklet"
   names(df)[names(df) == "Red necked Phalarope"] <- "Red-necked Phalarope"
-  names(df)[names(df) == "Yelloweye line"] <- "Yelloweye RF line"
+  names(df)[names(df) == "Yelloweye line"] <- "Yelloweye rockfish line"
   names(df)[names(df) == "Div Fish"] <- "Fish Diversity"
   names(df)[names(df) == "Div Invert"] <- "Invert Diversity"
   names(df)[names(df) == "nSp Fish"] <- "Fish Richness"
   names(df)[names(df) == "nSp Invert"] <- "Invert Richness"
   names(df)[names(df) == "Chla mean nsb"] <- "Mean Chla"
   names(df)[names(df) == "Bloom freq nsb"] <- "Bloom frequency"
+  names(df)[names(df) == "RedUrchin"] <- "Red Urchin"
+  names(df)[names(df) == "GreenUrchin"] <- "Green Urchin"
+  names(df)[names(df) == "RedSeaCucumber"] <- "Red Sea Cucumber"
+  names(df)[names(df) == "DungenessCrab"] <- "Dungeness Crab"
+  names(df)[names(df) == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
+  names(df)[names(df) == "SeaOtterRange"] <- "Sea Otter Range"
+  names(df)[names(df) == "SpongeReef"] <- "Sponge Reef"
   assign(d, df)
 }
 
@@ -191,9 +179,13 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
     if(max(brks) > max(dfsub$upper_CI, na.rm=T))  brks <- brks[-length(brks)]
     
     # plot
-    insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
+    if(type == "Presence") insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
+    if(!type == "Presence") insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value, size=pData))
     insetfig <- insetfig + geom_point(pch=16)
     insetfig <- insetfig + geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)
+    if(!type == "Presence") insetfig <- insetfig + 
+      scale_size_area(max_size = 3, name = "Data \ncoverage (%)",
+                      breaks = c(0, 20, 40, 60, 80, 100), limits = c(0,100))
     if(type == "Presence"){
       insetfig <- insetfig + labs(x="", y="Occurrence (%)")
     } else {
@@ -208,7 +200,16 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
                                  axis.ticks.length = unit(0.1,"cm"),
                                  axis.text = element_text(size=size, colour = "black"),
                                  axis.title = element_text(size=size+1, colour = "black"),
+                                 panel.spacing = unit(0.1, "lines"),
+                                 legend.key = element_blank(),
+                                 legend.background = element_blank(),
+                                 legend.direction = "vertical",
+                                 legend.position = c(.7,-.2),
+                                 legend.justification = c(.5,1),
+                                 legend.text = element_text(size=size, colour = "black"),
+                                 legend.title = element_text(size=size+1, colour = "black"),
                                  plot.margin = unit(c(1,1,1,1), "lines"))
+
     if(type=="Diversity" | type=="Productivity") insetfig <- insetfig + 
       theme(axis.text.x = element_text(size=size, colour = "black", angle = 90, vjust=0.5, hjust=1))
     
@@ -252,8 +253,8 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
 
 
 # Maps
-MapLayers( griddata = dens, df=dfdens, type = "Density")
-MapLayers( griddata = pres, df=dfpres,  type = "Presence")
-MapLayers( griddata = div, df=dfdp, type = "Diversity")
-MapLayers( griddata = prod, df=dfdp, type = "Productivity")
+MapLayers( griddata = dens, df=dfdens, type = "Density" )
+MapLayers( griddata = pres, df=dfpres,  type = "Presence" )
+MapLayers( griddata = div, df=dfdp, type = "Diversity" )
+MapLayers( griddata = prod, df=dfdp, type = "Productivity" )
 

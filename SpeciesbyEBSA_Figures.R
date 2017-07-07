@@ -110,6 +110,27 @@ dfdens$Species[dfdens$Species == "Red necked Phalarope"] <- "Red-necked Phalarop
 dfdens$Species[dfdens$Species == "Yelloweye line"] <- "Yelloweye RF line"
 
 
+# Reclass species names to common names
+for (d in c("dfdens", "dfpres")){
+  df <- get(d)
+  df$Species <- gsub("_"," ", df$Species)
+  df$Species[df$Species == "Fork tailed Storm petrel"] <- "Fork-tailed Storm-petrel"
+  df$Species[df$Species == "Leachs Storm petrel"] <- "Leach's Storm petrel"
+  df$Species[df$Species == "Cassins Auklet"] <- "Cassin's Auklet"
+  df$Species[df$Species == "Red necked Phalarope"] <- "Red-necked Phalarope"
+  df$Species[df$Species == "Yelloweye line"] <- "Yelloweye rockfish line"
+  df$Species[df$Species == "RedUrchin"] <- "Red Urchin"
+  df$Species[df$Species == "GreenUrchin"] <- "Green Urchin"
+  df$Species[df$Species == "RedSeaCucumber"] <- "Red Sea Cucumber"
+  df$Species[df$Species == "DungenessCrab"] <- "Dungeness Crab"
+  df$Species[df$Species == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
+  df$Species[df$Species == "SeaOtterRange"] <- "Sea Otter Range"
+  df$Species[df$Species == "SpongeReef"] <- "Sponge Reef"
+  assign(d, df)
+}
+
+
+
 # Save dfpres and dfdens to plot with maps
 save(dfdens, file="Aggregated/Denisty_PlotData.Rdata")
 save(dfpres, file="Aggregated/Presence_PlotData.Rdata")

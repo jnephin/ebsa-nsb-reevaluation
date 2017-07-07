@@ -14,8 +14,6 @@
 ###############################################################################
 
 
-###-- to do: use centroids of the grids rather than the polygon grids themselves in overlay. That way a grid cell mostly outside of the EBSA won't be counted as inside.
-
 # Load packages
 library(rgdal)
 library(raster)
@@ -36,46 +34,46 @@ load(file="Aggregated/Grid_PresenceData.Rdata") #pres
 # Species important to each EBSA
 
 HecateStraitFront <- NULL
-McIntyreBay <-  c("DungenessCrab","Halibut","Halibut_line","Eulachon","Herring",
-                  "Killer_Whale","Humpback_Whale")
+McIntyreBay <-  c("DungenessCrab","Halibut","Eulachon","Herring",
+                  "Killer_Whale","Humpback_Whale","Scoters")
 DogfishBank <-  c("DungenessCrab", "Shearwaters", "Red_necked_Phalarope",
-                  "Large_Gulls","Ancient_Murrelet")
-#, "Scoters","Pacific_cod","Sand_sole","Butter_sole","English_sole","Rock_sole") # flatfish IA, no data for these species on dogfish bank 
+                  "Large_Gulls","Ancient_Murrelet","Scoters")
 LearmonthBank  <-  c("Fin_Whale","Gray_Whale","Common_Murre","Pigeon_Guillemot",
-                     "Marbled_Murrelet","Rhinoceros_Auklet","Ancient_Murrelet") # included all auk species b/c paper just said alcids
-BrooksPeninsula <- c("SeaOtterRange","Lingcod","Lingcod_line",
-                     "Green_sturgeon","Red_necked_Phalarope","Common_Murre",
-                     "Tufted_Puffin","Shearwaters","Large_Gulls",
-                     "Rhinoceros_Auklet")
+                     "Rhinoceros_Auklet","Ancient_Murrelet") # included all auk species b/c paper just said alcids
+BrooksPeninsula <- c("SeaOtterRange","Lingcod_line","Shearwaters")
 CapeStJames <- c("Halibut", "Halibut_line","StellarSeaLionRookeries",
-                 "Humpback_Whale","Blue_Whale","Fin_Whale")
+                 "Humpback_Whale","Blue_Whale","Fin_Whale","Shearwaters")
 ShelfBreak <- c("Pacific_hake","Humpback_Whale","TannerCrab","Sperm_Whale", "Blue_Whale",
-                "Fin_Whale","Eulachon","Sablefish","Sablefish_line","Dover_sole",
+                "Fin_Whale","Eulachon","Sablefish","Dover_sole",
                 "Pacific_Ocean_perch","Yellowtail_rockfish","Yellowmouth_rockfish","Gray_Whale",
-                "Cassins_Auklet","Ancient_Murrelet","Rhinoceros_Auklet","Tufted_Puffin",
-                "Fork_tailed_Storm_petrel", "Leachs_Storm_petrel","Shearwaters")
+                "Cassins_Auklet","Rhinoceros_Auklet","Tufted_Puffin",
+                "Fork_tailed_Storm_petrel", "Leachs_Storm_petrel")
 ScottIslands <-  c("SeaOtterRange","Gray_Whale","Humpback_Whale","StellarSeaLionRookeries",
                    "Pacific_cod","Lingcod","Lingcod_line","Sablefish",
                    "Sablefish_line","Pacific_hake","Herring","Widow_rockfish",
                    "Cassins_Auklet","Rhinoceros_Auklet","Tufted_Puffin","Common_Murre",
-                   "Cormorants","Pigeon_Guillemot","Large_Gulls","Fork_tailed_Storm_petrel",
-                   "Leachs_Storm_petrel","Black_footed_Albatross", "Northern_Fulmar",
-                   "Sand_sole","Butter_sole","English_sole","Rock_sole")
-NorthIslandsStraits <- c("Killer_Whale","Gray_Whale", "Humpback_Whale","Herring",
-                         "Shrimp","Prawn","GreenUrchin","SeaOtterRange","Rhinoceros_Auklet",
-                         "Fork_tailed_Storm_petrel", "Leachs_Storm_petrel")
+                   "Large_Gulls","Fork_tailed_Storm_petrel","Leachs_Storm_petrel",
+                   "Black_footed_Albatross", "Northern_Fulmar","Shearwaters",
+                   "Arrowtooth_flounder", "Petrale_sole", "Butter_sole", 
+                   "Rock_sole", "Dover_sole", "English_sole")
+NorthIslandsStraits <- c("Killer_Whale","Gray_Whale", "Humpback_Whale",
+                         "Shrimp","Prawn","GreenUrchin","SeaOtterRange",
+                         "Fork_tailed_Storm_petrel", "Leachs_Storm_petrel",
+                         "Cassins_Auklet","Rhinoceros_Auklet","Tufted_Puffin",
+                         "Ancient_Murrelet")
 SpongeReefs <-  c("SpongeReef")
 ChathamSound  <- c("GreenUrchin","DungenessCrab","Shrimp","Herring_spawn","Killer_Whale",
-                   "Humpback_Whale","Scoters","Walleye_pollock")
+                   "Humpback_Whale","Scoters")
+HaidaGwaiiNearshore <- c("Fin_Whale","Humpback_Whale","Gray_Whale","RedUrchin","RedSeaCucumber",
+                         "Abalone","Shearwaters", "Herring_spawn","Pacific_cod",
+                         "StellarSeaLionRookeries","Arrowtooth_flounder", "Petrale_sole", 
+                         "Butter_sole", "Rock_sole", "Dover_sole", "English_sole")
 CentralMainland  <- c("SeaOtterRange","StellarSeaLionRookeries","Killer_Whale","Fin_Whale",
-                      "Humpback_Whale","Gray_Whale","RedSeaCucumber","Black_rockfish",
-                      "China_rockfish","Copper_rockfish","Quillback_rockfish",
-                      "Tiger_rockfish","Yelloweye_rockfish","Yelloweye_line" ) # not in table: overlap with sea cuc IA, rockfish are inshore spp found in conservation priorities SAR
+                      "Humpback_Whale","Gray_Whale","RedSeaCucumber",
+                      "Sablefish_line","Shearwaters") 
 BellaBellaNearshore <- c("SeaOtterRange","Geoduck","RedUrchin","RedSeaCucumber",
                          "Shrimp","Killer_Whale","Herring_spawn")
-HaidaGwaiiNearshore <- c("Fin_Whale","Humpback_Whale","RedUrchin","RedSeaCucumber",
-                         "Herring_spawn","Pacific_cod","Abalone","StellarSeaLionRookeries",
-                         "Shearwaters")
+
 
 
 # all important species
