@@ -179,11 +179,13 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
     if(max(brks) > max(dfsub$upper_CI, na.rm=T))  brks <- brks[-length(brks)]
     
     # plot
-    if(type == "Presence") insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
-    if(!type == "Presence") insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value, size=pData))
+    if(type == "Presence" |  type == "Productivity") 
+      insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
+    if( !(type == "Presence" | type == "Productivity") ) 
+      insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value, size=pData))
     insetfig <- insetfig + geom_point(pch=16)
     insetfig <- insetfig + geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)
-    if(!type == "Presence") insetfig <- insetfig + 
+    if(! (type == "Presence" | type == "Productivity") ) insetfig <- insetfig + 
       scale_size_area(max_size = 3, name = "Data \ncoverage (%)",
                       breaks = c(0, 20, 40, 60, 80, 100), limits = c(0,100))
     if(type == "Presence"){

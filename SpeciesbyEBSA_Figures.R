@@ -100,16 +100,6 @@ for (d in c("dfpres", "dfdens")){
 
 
 # -------------------------------------------------#
-# Reclass brid names to short names
-
-dfdens$Species <- gsub("_"," ", dfdens$Species)
-dfdens$Species <- gsub("rockfish","RF", dfdens$Species)
-dfdens$Species[dfdens$Species == "Fork tailed Storm petrel"] <- "Fork-tailed Storm-petrel"
-dfdens$Species[dfdens$Species == "Leachs Storm petrel"] <- "Leach's Storm petrel"
-dfdens$Species[dfdens$Species == "Red necked Phalarope"] <- "Red-necked Phalarope"
-dfdens$Species[dfdens$Species == "Yelloweye line"] <- "Yelloweye RF line"
-
-
 # Reclass species names to common names
 for (d in c("dfdens", "dfpres")){
   df <- get(d)
