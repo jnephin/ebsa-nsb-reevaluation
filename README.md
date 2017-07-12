@@ -21,8 +21,8 @@ Aggregates by grid cell
 
 SpeciesbyEBSA_Overlay.R
 -----------------------
-Assigns species to EBSAs based on IA info and reports. Performs spatial overlay for each 
-species. Adds an inside or outside attribute for each cell for each of the relavant EBSAs.
+Assigns species to EBSAs based on IA info and reports. Performs spatial overlay for each species. 
+Adds an inside or outside attribute for each cell for each EBSAs.
 
 SpeciesbyEBSA_InOutStatistics.R
 -------------------------------
@@ -32,7 +32,7 @@ a 95% confidence interval around the sample statistic.
 
 SpeciesbyEBSA_Figures.R
 -----------------------
-Produces figures that compare species statistics inside and outside EBSAs.
+Produces figures that compare statistics inside and outside EBSAs.
 
 
 ProductivitybyEBSA_Overlay.R
@@ -66,6 +66,6 @@ MapEBSAs.R
 Exports maps of species density and presence as well as and richness and diveristy 
 data aggregated by a 5km grid
 
-MapProductivity.R
+Results_Summary.R
 -----------------
-Exports maps of mean chla and bloom frequency with EBSA boundaries
+Exports table documenting level of support by species for each EBSA.

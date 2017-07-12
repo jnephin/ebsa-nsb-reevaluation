@@ -26,24 +26,49 @@ library(grid)
 # Go to parent directory
 setwd('..')
 
+# Create output directories
+dir.create("Output/Maps/Density")
+dir.create("Output/Maps/Diversity")
+dir.create("Output/Maps/Presence")
+dir.create("Output/Maps/Productivity")
 
 # -------------------------------------------------#
-# Load EBSA polygons
+# List EBSA polygons
 gdb <- "EBSA_Polygons/EBSAs.gdb"
-ebsas <- ogrListLayers(gdb)
+ebsalist <- ogrListLayers(gdb)
 
 # loop through each ebsa polygon
 # merge into one spatial polygon data frame
-spdf <- readOGR(dsn=gdb, layer=ebsas[1])
-for(i in ebsas[2:length(ebsas)]){
+spdf <- readOGR(dsn=gdb, layer=ebsalist[1])
+spdf <- as( spdf, "SpatialPolygons" )
+spdf$EBSA <- rep(ebsalist[1],length(spdf))
+for(i in ebsalist[2:length(ebsalist)]){
   #load polygons
   poly <- readOGR(dsn=gdb, layer=i)
+  poly <- as( poly, "SpatialPolygons" )
+  poly$EBSA <- rep(i,length(poly))
   spdf <- rbind(spdf,poly)
 }
 
-# Convert to spatial polygons (i.e., drop the data)
-spdf <- as( spdf, "SpatialPolygons" )
-# -------------------------------------------------#
+# Remove extra attributes
+spdf <- spdf[,names(spdf) %in% "EBSA"]
+
+# reclass
+spdf@data$EBSA <- as.character(spdf@data$EBSA)
+spdf@data$EBSA[spdf@data$EBSA == "BellaBellaNearshore"] <- " BB "
+spdf@data$EBSA[spdf@data$EBSA == "BrooksPeninsula"] <- " BP "
+spdf@data$EBSA[spdf@data$EBSA == "CapeStJames"] <- " CSJ "
+spdf@data$EBSA[spdf@data$EBSA == "CentralMainland"] <- " CM "
+spdf@data$EBSA[spdf@data$EBSA == "ChathamSound"] <- " CS "
+spdf@data$EBSA[spdf@data$EBSA == "DogfishBank"] <- " DB "
+spdf@data$EBSA[spdf@data$EBSA == "HaidaGwaiiNearshore"] <- " HG "
+spdf@data$EBSA[spdf@data$EBSA == "HecateStraitFront"] <- " HSF "
+spdf@data$EBSA[spdf@data$EBSA == "LearmonthBank"] <- " LB "
+spdf@data$EBSA[spdf@data$EBSA == "McIntyreBay"] <- " MB "
+spdf@data$EBSA[spdf@data$EBSA == "NorthIslandsStraits"] <- " NIS "
+spdf@data$EBSA[spdf@data$EBSA == "ScottIslands"] <- " SI "
+spdf@data$EBSA[spdf@data$EBSA == "ShelfBreak"] <- " SB "
+spdf@data$EBSA[spdf@data$EBSA == "SpongeReefs"] <- " SR "
 
 
 # -------------------------------------------------#
@@ -93,6 +118,7 @@ for (d in c("dens", "pres", "div", "prod")){
   names(df)[names(df) == "DungenessCrab"] <- "Dungeness Crab"
   names(df)[names(df) == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
   names(df)[names(df) == "SeaOtterRange"] <- "Sea Otter Range"
+  names(df)[names(df) == "TannerCrab"] <- "Tanner Crab"
   names(df)[names(df) == "SpongeReef"] <- "Sponge Reef"
   assign(d, df)
 }
@@ -116,6 +142,10 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
   
   # loop through layers
   for(p in layers){
+    
+    # EBSAs to bolden
+    if(type == "Presence" | type == "Density") e <- df$EBSA[df$Species == p]
+    if(type == "Diversity" | type == "Productivity") e <- df$EBSA[df$Metric == p]
     
     # Keep only attribute to plot
     Layer <- griddata[p]
@@ -178,46 +208,6 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
     brks <- pretty( c(dfsub$value,dfsub$lower_CI,dfsub$upper_CI), n=4 )
     if(max(brks) > max(dfsub$upper_CI, na.rm=T))  brks <- brks[-length(brks)]
     
-    # plot
-    if(type == "Presence" |  type == "Productivity") 
-      insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
-    if( !(type == "Presence" | type == "Productivity") ) 
-      insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value, size=pData))
-    insetfig <- insetfig + geom_point(pch=16)
-    insetfig <- insetfig + geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)
-    if(! (type == "Presence" | type == "Productivity") ) insetfig <- insetfig + 
-      scale_size_area(max_size = 3, name = "Data \ncoverage (%)",
-                      breaks = c(0, 20, 40, 60, 80, 100), limits = c(0,100))
-    if(type == "Presence"){
-      insetfig <- insetfig + labs(x="", y="Occurrence (%)")
-    } else {
-      insetfig <- insetfig + labs(x="", y="Mean Density")
-    }
-    insetfig <- insetfig + scale_y_continuous(breaks = brks)
-    insetfig <- insetfig + theme(plot.background = element_blank(),
-                                 panel.border = element_blank(),
-                                 panel.background = element_rect(fill=NA,colour="black"),
-                                 axis.ticks = element_line(colour="black"),
-                                 panel.grid= element_blank(),
-                                 axis.ticks.length = unit(0.1,"cm"),
-                                 axis.text = element_text(size=size, colour = "black"),
-                                 axis.title = element_text(size=size+1, colour = "black"),
-                                 panel.spacing = unit(0.1, "lines"),
-                                 legend.key = element_blank(),
-                                 legend.background = element_blank(),
-                                 legend.direction = "vertical",
-                                 legend.position = c(.7,-.2),
-                                 legend.justification = c(.5,1),
-                                 legend.text = element_text(size=size, colour = "black"),
-                                 legend.title = element_text(size=size+1, colour = "black"),
-                                 plot.margin = unit(c(1,1,1,1), "lines"))
-
-    if(type=="Diversity" | type=="Productivity") insetfig <- insetfig + 
-      theme(axis.text.x = element_text(size=size, colour = "black", angle = 90, vjust=0.5, hjust=1))
-    
-    #A viewport taking up a fraction of the plot area
-    vp <- viewport(width = 0.58, height = 0.4, x = 1, y = 1, just=c(1,1))
-    
     # legend title
     if(type == "Presence"){
       ltitle <- ""
@@ -233,6 +223,46 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
       ltitle <- "Frequency of monthly\n plankton blooms"
     }
     
+    # plot
+    if(type == "Presence" |  type == "Productivity") 
+      insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
+    if( !(type == "Presence" | type == "Productivity") ) 
+      insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value, size=pData))
+    insetfig <- insetfig + geom_point(pch=16)
+    insetfig <- insetfig + geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)
+    if(! (type == "Presence" | type == "Productivity") ) insetfig <- insetfig + 
+      scale_size_area(max_size = 3, name = "Data \ncoverage (%)",
+                      breaks = c(0, 20, 40, 60, 80, 100), limits = c(0,100))
+    if(type == "Presence"){
+      insetfig <- insetfig + labs(x="", y="Occurrence (%)")
+    } else {
+      insetfig <- insetfig + labs(x="", y=ltitle)
+    }
+    insetfig <- insetfig + scale_y_continuous(breaks = brks)
+    insetfig <- insetfig + theme(plot.background = element_blank(),
+                                 panel.border = element_blank(),
+                                 panel.background = element_rect(fill=NA,colour="black"),
+                                 axis.ticks = element_line(colour="black"),
+                                 panel.grid= element_blank(),
+                                 axis.ticks.length = unit(0.1,"cm"),
+                                 axis.text = element_text(size=size, colour = "black"),
+                                 axis.title = element_text(size=size+1, colour = "black"),
+                                 panel.spacing = unit(0.1, "lines"),
+                                 legend.key = element_blank(),
+                                 legend.background = element_blank(),
+                                 legend.direction = "vertical",
+                                 legend.position = c(.7,-.25),
+                                 legend.justification = c(.5,1),
+                                 legend.text = element_text(size=size, colour = "black"),
+                                 legend.title = element_text(size=size+1, colour = "black"),
+                                 plot.margin = unit(c(1,1,1,1), "lines"))
+
+    if(type=="Diversity" | type=="Productivity") insetfig <- insetfig + 
+      theme(axis.text.x = element_text(size=size, colour = "black", angle = 90, vjust=0.5, hjust=1))
+    
+    #A viewport taking up a fraction of the plot area
+    vp <- viewport(width = 0.58, height = 0.4, x = 1, y = 1, just=c(1,1))
+    
     # Export Figure
     tiff(file=file.path("Output/Maps", type, paste0(p, ".tif")),
          width = 4.8 , height = 5.25, units = "in", res = 300,
@@ -240,7 +270,8 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
     par(mar=c(1,1,1,1))
     plot( bcPoly, col = "grey60", border = NA, xlim = lims$x , ylim = lims$y)
     plot( Layer, col=Layer$colours, border=NA, add = T )
-    plot( spdf, add=T, lwd=.7)
+    plot( spdf[!spdf$EBSA %in% e,], add=T, lwd=.6 )
+    plot( spdf[spdf$EBSA %in% e,], add=T, lwd=1.1 )
     legend( "bottomleft", legend = pal$labels, fill = pal$colours,
             title = ltitle, bg = NA, box.col = NA, cex = .8, pt.cex=3, border=NA)
     title(p, adj=.05, cex.main = 1 )
@@ -251,7 +282,6 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
   } # end loop through layers
 } # End MapLayers function
 # -------------------------------------------------#
-
 
 
 # Maps

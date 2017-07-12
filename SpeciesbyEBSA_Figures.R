@@ -7,9 +7,10 @@
 # Contact:      e-mail: jessica.nephin@dfo-mpo.gc.ca | tel: 250.363.6564
 # Project:      NSB EBSA re-assessment
 #
-# Overview: Produces figures that compare species statistics inside and outside 
-#          ebsa. Species are those listed as important for the EBSAs in 
-#          Clark & Jamieson 2006 Phase II.
+# Overview: 
+#       Produces figures that compare species statistics inside and outside 
+#       ebsa. Species are those listed as important for the EBSAs in 
+#       Clark & Jamieson 2006 Phase II.
 #
 ###############################################################################
 
@@ -24,13 +25,12 @@ library(rgdal)
 setwd('..')
 
 
+#---------------------------------------------------------#
 # load data
 #  presence data
 load("Aggregated/EBSA_Presence_Statistics.Rdata") #presdat
 #  density data
 load("Aggregated/EBSA_Density_Statistics.Rdata") #densdat
-
-
 
 # Convert list to data.frame
 dfpres <- melt(presdat, id.vars=c("EBSA","stat","value","lower_CI","upper_CI"))
@@ -50,6 +50,23 @@ dfdens <- merge(dfdens, dfNA, by=c("EBSA","Species"))
 dfdens <- dfdens[dfdens$stat == "mean",]
 # subset presence data to only include stat == pPres
 dfpres <- dfpres[dfpres$stat == "pPres",]
+
+
+#---------------------------------------------------------#
+# load species by ebsas
+load("Aggregated/SpeciesByEBSAs.Rdata") #spbyebsa
+spbyebsa <- melt(spbyebsa)
+colnames(spbyebsa) <- c("EBSA","Species")
+
+# remove species for ebsas which they were not listed as important
+for (d in c("dfpres", "dfdens")){
+  df <- get(d)
+  mer <- merge(spbyebsa, df, by=c("EBSA", "Species"))
+  mer$EBSA <- as.character(mer$EBSA)
+  mer <- rbind(mer, df[df$EBSA == "Outside",])
+  assign(d, mer)
+}
+
 
 #---------------------------------------------------------#
 
@@ -115,6 +132,7 @@ for (d in c("dfdens", "dfpres")){
   df$Species[df$Species == "DungenessCrab"] <- "Dungeness Crab"
   df$Species[df$Species == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
   df$Species[df$Species == "SeaOtterRange"] <- "Sea Otter Range"
+  df$Species[df$Species == "TannerCrab"] <- "Tanner Crab"
   df$Species[df$Species == "SpongeReef"] <- "Sponge Reef"
   assign(d, df)
 }

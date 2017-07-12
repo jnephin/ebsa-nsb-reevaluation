@@ -44,15 +44,14 @@ load(file="Aggregated/EBSA_Presence_Overlay.Rdata") #presEBSA
 
 
 #---------------------------------------------------------#
-
-# all important species
-load("Scripts/Species")
-
 # ebsas
 ebsas <- c("HecateStraitFront","BellaBellaNearshore","BrooksPeninsula","CapeStJames",
            "CentralMainland","ChathamSound","DogfishBank","HaidaGwaiiNearshore",
            "LearmonthBank","McIntyreBay","NorthIslandsStraits","ScottIslands",
            "ShelfBreak","SpongeReefs")
+
+# load species by ebsas
+load("Aggregated/SpeciesByEBSAs.Rdata") #spbyebsa
 
 #---------------------------------------------------------#
 
@@ -62,15 +61,16 @@ ebsas <- c("HecateStraitFront","BellaBellaNearshore","BrooksPeninsula","CapeStJa
 densdat <- list()
 
 # loop through each species in survey data
-for(s in species){
-  # is the species present in the dataset
-  if( s %in% names(densEBSA) ){
-    
+for(s in names(densEBSA)){
+  
     # aggregated data for species s
     spdf <- densEBSA[[s]]
+    
+    # ebsas where the species was listed as important
+    e <- spbyebsa[[s]]
 
-    # add outside grid cells column
-    out <- spdf@data[-1]
+    # add outside attribute - area outside of ebsa for which the sp is important
+    out <- spdf@data[e]
     outindex <- which(apply(out, 1, sum) == 0)
     spdf@data$Outside <- 0
     spdf@data$Outside[outindex] <- 1
@@ -123,7 +123,6 @@ for(s in species){
     
     # add to list
     densdat[[s]] <- dat
-  }
 }
 
 # save survey data
@@ -137,15 +136,15 @@ save(densdat, file="Aggregated/EBSA_Density_Statistics.Rdata")
 presdat <- list()
 
 # loop through each species in presence data
-for(s in species){
-  # is the species present in the dataset
-  if( s %in% names(presEBSA) ){
-    
+for( s in names(presEBSA) ){
+
     # aggregated data for species s
     spdf <- presEBSA[[s]]
+    # ebsas where the species was listed as important
+    e <- spbyebsa[[s]]
     
-    # add outside grid cells column
-    out <- spdf@data[-1]
+    # add outside attribute - area outside of ebsa for which the sp is important
+    out <- spdf@data[e]
     outindex <- which(apply(out, 1, sum) == 0)
     spdf@data$Outside <- 0
     spdf@data$Outside[outindex] <- 1
@@ -195,7 +194,6 @@ for(s in species){
     
     # add to list
     presdat[[s]] <- dat
-  }
 }
 
 # save presence data

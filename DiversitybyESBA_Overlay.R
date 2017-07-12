@@ -26,7 +26,11 @@ setwd('..')
 # Load gridded data
 load(file="Aggregated/Grid_DiversityData.Rdata") #div
 
-
+# Convert to points for overlay
+# that way the grid cell will be marked as inside only if the centroid is within the ebsa
+proj <- proj4string(div)
+ptdiv <- gCentroid(div, byid=TRUE)
+div <- SpatialPointsDataFrame(coordinates(ptdiv), div@data, proj4string = CRS(proj))
 
 # -------------------------------------------------#
 # List EBSA polygons

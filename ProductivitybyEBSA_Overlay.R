@@ -28,6 +28,13 @@ nsb <- readOGR(dsn="Boundary", layer="NSB")
 # load aggregated layer
 load("Aggregated/Grid_ProductivityData.Rdata") #prod
 
+# Convert to points for overlay
+# that way the grid cell will be marked as inside only if the centroid is within the ebsa
+proj <- proj4string(prod)
+ptprod <- gCentroid(prod, byid=TRUE)
+prod <- SpatialPointsDataFrame(coordinates(ptprod), prod@data, proj4string = CRS(proj))
+
+
 # -------------------------------------------------#
 # List EBSA polygons
 gdb <- "EBSA_Polygons/EBSAs.gdb"

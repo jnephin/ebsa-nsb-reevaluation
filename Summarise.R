@@ -62,5 +62,5 @@ castdf <- castdf[c("EBSA","DataType","Species","pPres","pNA")]
 colnames(castdf) <- c("EBSA","DataType","Species","Presence (%)","No Data (%)")
 
 # Export as csv
-write.csv(castdf, file= "Output/Tables/EBSA_DensityData_Summary.csv", row.names=FALSE)
+write.csv(castdf, file= "Output/Tables/Data_Coverage.csv", row.names=FALSE)
 
