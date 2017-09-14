@@ -72,15 +72,18 @@ McIntyreBay <-  c("DungenessCrab","Halibut","Eulachon","Herring",
 DogfishBank <-  c("DungenessCrab", "Shearwaters", "Red_necked_Phalarope",
                   "Large_Gulls","Ancient_Murrelet","Scoters")
 LearmonthBank  <-  c("Fin_Whale","Gray_Whale","Common_Murre","Pigeon_Guillemot",
-                     "Rhinoceros_Auklet","Ancient_Murrelet") # included all auk species b/c paper just said alcids
+                     "Rhinoceros_Auklet","Ancient_Murrelet",
+                     "Corals") # included all auk species b/c paper just said alcids
 BrooksPeninsula <- c("SeaOtterRange","Lingcod_line","Shearwaters")
 CapeStJames <- c("Halibut", "Halibut_line","StellarSeaLionRookeries",
-                 "Humpback_Whale","Blue_Whale","Fin_Whale","Shearwaters")
+                 "Humpback_Whale","Blue_Whale","Fin_Whale","Shearwaters",
+                 "Sponges", "Corals")
 ShelfBreak <- c("Pacific_hake","Humpback_Whale","TannerCrab","Sperm_Whale", "Blue_Whale",
                 "Fin_Whale","Eulachon","Sablefish","Dover_sole",
                 "Pacific_Ocean_perch","Yellowtail_rockfish","Yellowmouth_rockfish",
                 "Gray_Whale","Cassins_Auklet","Rhinoceros_Auklet",
-                "Fork_tailed_Storm_petrel", "Leachs_Storm_petrel")
+                "Fork_tailed_Storm_petrel", "Leachs_Storm_petrel",
+                "Sponges", "Corals")
 ScottIslands <-  c("SeaOtterRange","Gray_Whale","Humpback_Whale","StellarSeaLionRookeries",
                    "Pacific_cod","Lingcod","Lingcod_line","Sablefish",
                    "Sablefish_line","Pacific_hake","Herring","Widow_rockfish",

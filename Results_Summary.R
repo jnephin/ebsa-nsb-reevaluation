@@ -14,6 +14,7 @@
 
 # Load packages
 library(reshape2)
+library(dplyr)
 
 # Go to parent directory
 setwd('..')
@@ -68,6 +69,29 @@ dat$Imp[is.na(dat$Imp)] <- "n"
 
 
 #---------------------------------------------------------#
+# reclass 
+dat$Metric <- gsub("_"," ", dat$Metric )
+dat$Metric[dat$Metric == "Fork tailed Storm petrel"] <- "Fork-tailed Storm-petrel"
+dat$Metric[dat$Metric == "Leachs Storm petrel"] <- "Leach's Storm petrel"
+dat$Metric[dat$Metric == "Cassins Auklet"] <- "Cassin's Auklet"
+dat$Metric[dat$Metric == "Red necked Phalarope"] <- "Red-necked Phalarope"
+dat$Metric[dat$Metric == "Yelloweye line"] <- "Yelloweye rockfish line"
+dat$Metric[dat$Metric == "Div Fish"] <- "Fish Diversity"
+dat$Metric[dat$Metric == "Div Invert"] <- "Invert Diversity"
+dat$Metric[dat$Metric == "nSp Fish"] <- "Fish Richness"
+dat$Metric[dat$Metric == "nSp Invert"] <- "Invert Richness"
+dat$Metric[dat$Metric == "Chla mean nsb"] <- "Mean Chla"
+dat$Metric[dat$Metric == "Bloom freq nsb"] <- "Bloom frequency"
+dat$Metric[dat$Metric == "RedUrchin"] <- "Red Urchin"
+dat$Metric[dat$Metric == "GreenUrchin"] <- "Green Urchin"
+dat$Metric[dat$Metric == "RedSeaCucumber"] <- "Red Sea Cucumber"
+dat$Metric[dat$Metric == "DungenessCrab"] <- "Dungeness Crab"
+dat$Metric[dat$Metric == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
+dat$Metric[dat$Metric == "SeaOtterRange"] <- "Sea Otter Range"
+dat$Metric[dat$Metric == "TannerCrab"] <- "Tanner Crab"
+dat$Metric[dat$Metric == "SpongeReef"] <- "Sponge Reef"
+
+#---------------------------------------------------------#
 # add result column
 dat$result <- "No"
 dat$result[dat$In_upper > dat$Out_upper &
@@ -78,12 +102,13 @@ dat$result[dat$In_lower > dat$Out_upper] <- "Strong"
 # remove non-important species without strong support
 dat <- dat[!(dat$Imp == "n" & dat$result != "Strong"),]
   
-# order
-dat <- dat[order(dat$EBSA, dat$Imp),]
-dat <- dat[, c(1,2,9,10,3:8)]
+# re-organise data
+reorg <- dat %>% group_by(EBSA, Imp, result) %>%
+  summarise(species = paste(Metric, collapse = ", ")) %>%
+  as.data.frame()
 
 # Export as csv
-write.csv(dat, file= "Output/Tables/Results_Summary.csv", row.names=FALSE)
+write.csv(reorg, file= "Output/Tables/Results_Summary.csv", row.names=FALSE)
 
 
 

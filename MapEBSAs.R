@@ -129,6 +129,7 @@ for (d in c("dens", "pres", "div", "prod")){
 load("Aggregated/Denisty_PlotData.Rdata") #dfdens
 load("Aggregated/Presence_PlotData.Rdata") #dfpres
 load("Aggregated/DivProd_PlotData.Rdata") #dfdp
+dfdp$Species <- dfdp$Metric
 
 # -------------------------------------------------#
 # Map function
@@ -136,17 +137,15 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
   
   # layers in both grid and df data
   gridlayers <- unique(names(griddata))
-  if(type == "Presence" | type == "Density") dflayers <- unique(df$Species)
-  if(type == "Diversity" | type == "Productivity") dflayers <- unique(df$Metric)
+  dflayers <- unique(df$Species)
   layers <- dflayers[dflayers %in% gridlayers]
   
   # loop through layers
   for(p in layers){
     
     # EBSAs to bolden
-    if(type == "Presence" | type == "Density") e <- df$EBSA[df$Species == p]
-    if(type == "Diversity" | type == "Productivity") e <- df$EBSA[df$Metric == p]
-    
+    e <- df$EBSA[df$Species == p]
+
     # Keep only attribute to plot
     Layer <- griddata[p]
     
@@ -160,7 +159,7 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
       colnames(pal) <- c( p, "colours" )
       # break labels
       pal$labels <- as.character( brks )
-      pal$labels[ pal$labels == "0"] <- "Absence"
+      pal$labels[ pal$labels == "0"] <- "No data"
       pal$labels[ pal$labels == "1"] <- "Presence"
       # merge colours with layer data
       Layer <- sp::merge( Layer, pal )
@@ -201,9 +200,8 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
     lims <- list( x=c(ext@xmin*1.15, ext@xmax), y=c(ext@ymin, ext@ymax*.98) )
     
     # subset by species
-    if(type == "Presence" | type == "Density") dfsub <- df[df$Species == p,]
-    if(type == "Diversity" | type == "Productivity") dfsub <- df[df$Metric == p,]
-      
+    dfsub <- df[df$Species == p,]
+
     #y-axis limit and breaks
     brks <- pretty( c(dfsub$value,dfsub$lower_CI,dfsub$upper_CI), n=4 )
     if(max(brks) > max(dfsub$upper_CI, na.rm=T))  brks <- brks[-length(brks)]
