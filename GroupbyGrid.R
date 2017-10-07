@@ -23,7 +23,7 @@ library(rgeos)
 setwd('..')
 
 # Load grid
-grid <- readOGR(dsn="Grid", layer="NSB_5km_buffered")
+grid <- readOGR(dsn="Grid", layer="NSB_5km")
 
 
 ## Fish, Marine Mammal and Marine Birds ##
@@ -150,8 +150,8 @@ save(pres, file="Aggregated/Grid_PresenceData.Rdata")
 
 ## Productivity Data ##
 # load chla layer (includes straylight)
-chla <- raster("Data/Productivity/Chla_mean_nsb.tif")
-bloom <- raster("Data/Productivity/Bloom_freq_nsb.tif")
+chla <- raster("Data/Productivity/Chla_mean_straylight.tif")
+bloom <- raster("Data/Productivity/Bloom_freq_straylight.tif")
 
 # Conver to spatial points
 spchla <- rasterToPoints(chla, spatial=TRUE)
@@ -174,6 +174,108 @@ for(i in layers){
 }
 # add back to grid
 prod <- SpatialPolygonsDataFrame(grid, prod_df[-1])
+
 # Save
+names(prod) <- c("Chla_mean_nsb","Bloom_freq_nsb")
 save(prod, file="Aggregated/Grid_ProductivityData.Rdata")
+
+
+
+
+#-----------------------------------------------------------------------------------------#
+# Variance
+
+
+## Fish, Marine Mammal and Marine Birds ##
+# load gdb
+gdbs=c("Fish","MarineMammals","MarineBirds")
+for(gdb in gdbs){
+  fc_list = ogrListLayers(paste0("Data/",gdb,".gdb"))
+  # Empty dataframe for loop
+  df <- 1:nrow(grid)
+  for(i in fc_list){
+    # load feature class
+    dat <- readOGR(dsn=paste0("Data/",gdb,".gdb"), layer=i)
+    # Only retain column of interest
+    dat <- dat[i]
+    # assign matching proj4 string
+    if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
+    proj4string(grid) <-   proj4string(dat)
+    # aggregate points using grid
+    aggr <- aggregate(dat, grid, FUN="sd", na.rm=T)
+    # add to data.frame
+    df <- cbind(df, aggr@data)
+  }
+  # Remove SourceKey, x and y columns
+  df <- df[,!names(df) %in% c("df", "SourceKey","x","y")]
+  # add dataframe back onto grid
+  assign(gdb, SpatialPolygonsDataFrame(grid, df))
+}
+# Combine
+dens <- SpatialPolygonsDataFrame(grid, cbind(Fish@data,MarineMammals@data, MarineBirds@data))
+proj4string(dens) <- proj4string(Fish)
+# Save
+save(dens, file="Aggregated/Grid_DensityData_var.Rdata")
+
+
+
+## Diversity Data ##
+# load gdb
+fc_list = ogrListLayers("Data/Diversity.gdb")
+# Empty dataframe for loop
+df <- 1:nrow(grid)
+for(i in fc_list){
+  # load feature class
+  dat <- readOGR(dsn="Data/Diversity.gdb", layer=i)
+  # Only retain column of interest
+  dat <- dat[i]
+  # assign matching proj4 string
+  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
+  proj4string(grid) <-   proj4string(dat)
+  # aggregate points using grid
+  aggr <- aggregate(dat, grid, FUN="sd", na.rm=T)
+  # add to data.frame
+  df <- cbind(df, aggr@data)
+}
+# Remove SourceKey, x and y columns
+df <- df[,!names(df) %in% c("df", "SourceKey","x","y")]
+# add dataframe back onto grid
+div <- SpatialPolygonsDataFrame(grid, df)
+
+
+# Save
+save(div, file="Aggregated/Grid_DiversityData_var.Rdata")
+
+
+
+## Productivity Data ##
+# load chla layer (includes straylight)
+chla <- raster("Data/Productivity/Chla_mean_straylight.tif")
+bloom <- raster("Data/Productivity/Bloom_freq_straylight.tif")
+
+# Conver to spatial points
+spchla <- rasterToPoints(chla, spatial=TRUE)
+spbloom <- rasterToPoints(bloom, spatial=TRUE)
+
+# load gdb
+layers= c("spchla","spbloom")
+# Empty dataframe for loop
+prod_df <- 1:nrow(grid)
+for(i in layers){
+  # load feature class
+  dat <- get(i)
+  # assign matching proj4 string
+  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
+  proj4string(grid) <-   proj4string(dat)
+  # aggregate points using grid
+  aggr <- aggregate(dat, grid, FUN="sd", na.rm=T)
+  # add to data.frame
+  prod_df <- cbind(prod_df, aggr@data)
+}
+# add back to grid
+prod <- SpatialPolygonsDataFrame(grid, prod_df[-1])
+# Save
+names(prod) <- c("Chla_mean_nsb","Bloom_freq_nsb")
+save(prod, file="Aggregated/Grid_ProductivityData_var.Rdata")
+
 

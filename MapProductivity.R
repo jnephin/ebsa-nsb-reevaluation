@@ -24,31 +24,6 @@ setwd('..')
 
 
 # -------------------------------------------------#
-# Load EBSA in and outside polygons
-gdb <- "EBSA_Polygons/EBSAs_Overlay.gdb"
-ebsas <- ogrListLayers(gdb)
-
-# within only
-ebsas <- ebsas[-grep("^nsb_",ebsas)]
-
-# loop through each ebsa polygon
-# merge into one spatial polygon data frame
-spdf <- readOGR(dsn=gdb, layer=ebsas[1])
-for(i in ebsas[2:length(ebsas)]){
-  #load polygons
-  poly <- readOGR(dsn=gdb, layer=i)
-  spdf <- rbind(spdf,poly)
-}
-
-# Convert to spatial polygons (i.e., drop the data)
-spdf <- as( spdf, "SpatialPolygons" )
-
-
-# -------------------------------------------------#
-
-
-
-# -------------------------------------------------#
 # load boundary polygon
 nsb <- readOGR(dsn="Boundary", layer="NSB")
 # Convert to spatial polygons (i.e., drop the data)
@@ -73,39 +48,54 @@ bloom <- raster("Data/Productivity/Bloom_freq_nsb.tif")
 
 # -------------------------------------------------#
 
+# reclass uncert raster
+# all values >= 0 and <= 0.25 become 1, etc.
+uncert <- raster("Data/Productivity/Uncertainty_straylight.tif")
+m <- c(-1, 15, NA,  15, 16, 1)
+rclmat <- matrix(m, ncol=3, byrow=TRUE)
+interp_chla <- reclassify(uncert, rclmat)
+#writeRaster(interp_chla, "Data/Productivity/Interp_chla.tif", 
+#            datatype="INT2S",overwrite=TRUE)
 
+interp_chla <- readOGR( dsn="Data/Productivity", layer="interpchla_100m" )
+r <- raster(chla)
+rp <- rasterize(interp_chla, r, 'ID')
 
 # -------------------------------------------------#
 # MapRaster function
-MapRaster <- function( layer ){
-
-  # name
-  name <- names(layer)
-  name <- sub("_nsb","", name)
-
+MapRaster <- function( layer, filename, legend ){
+  
   # Get the vertical and horizontal limits
   ext <- extent( layer )
   # Get x and y limits
-  lims <- list( x=c(ext@xmin, ext@xmax), y=c(ext@ymin, ext@ymax) )
-
+  lims <- list( x=c(ext@xmin*1.1, ext@xmax*.98), y=c(ext@ymin*1.05, ext@ymax*.98) )
+  
   #colour
   pal <- rev(brewer.pal( 8, "Spectral" ))
-
+  
   # Map (up to 500,000 pixels)
-  pdf( file=file.path("Output/Maps/Productivity",  paste0(name,".pdf")),
-       height=6, width=6*diff(lims$x)/diff(lims$y)+1 )
-  par( mar=c(1,1,1,5) )
-  plot( bcPoly, col = "grey40", border = NA, xlim = lims$x*.98 , ylim = lims$y*.98 )
+  tiff( file=paste0("Output/Maps/Productivity/",filename,"_1km.tif"), 
+        height=5.25, width=4.8,
+        units = "in", res = 300,
+        compression = "lzw")
+  par(mar=c(.5,.5,.5,.5))
+  plot( bcPoly, col = "grey60", border = NA, xlim = lims$x , ylim = lims$y)
+  plot( layer, maxpixels=500000, add=TRUE, col=pal, legend=FALSE)
+  plot( rp, add=TRUE, col="#00000075", legend=FALSE)
+  plot( bcPoly, col = "grey60", add=TRUE,border = NA, xlim = lims$x , ylim = lims$y)
+  plot( layer, legend.only=TRUE, col=pal, smallplot= c(.7,.73,0.65,.9),
+        legend.args=list(text=legend, side=4, font=1, line=3.5, cex=1) )
   box( lty = 'solid', col = 'black')
-  plot( layer, maxpixels=500000, add=TRUE, col=pal,
-        legend.args=list(text=name, side=4, font=2, line=2.5, cex=0.8) )
-  plot( spdf, add=T )
   dev.off()
-
+  
 } # End MapRaster function
 # -------------------------------------------------#
 
 
 # Map
-MapRaster( chla )
-MapRaster( bloom )
+MapRaster( chla, filename="MeanChla", 
+           legend = "Mean Chlorophyll a\n (mg m-3)" )
+MapRaster( bloom, filename="BloomFreq", 
+           legend = "Frequency of monthly\n plankton blooms" )
+
+

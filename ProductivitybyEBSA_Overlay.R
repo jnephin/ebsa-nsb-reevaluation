@@ -22,9 +22,6 @@ library(rgeos)
 setwd('..')
 
 
-# Load boundary shapefile
-nsb <- readOGR(dsn="Boundary", layer="NSB")
-
 # load aggregated layer
 load("Aggregated/Grid_ProductivityData.Rdata") #prod
 

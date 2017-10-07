@@ -96,15 +96,19 @@ load(file="Aggregated/Grid_PresenceData.Rdata") #pres
 load(file="Aggregated/Grid_DiversityData.Rdata") #div
 load(file="Aggregated/Grid_ProductivityData.Rdata") #prod
 
+# remove bird species
+birds <- c("Shearwaters", "Scoters", "Ancient_Murrelet","Large_Gulls",
+           "Red_necked_Phalarope","Common_Murre","Pigeon_Guillemot",
+           "Rhinoceros_Auklet", "Cassins_Auklet", "Leachs_Storm_petrel",
+           "Tufted_Puffin","Fork_tailed_Storm_petrel", "Northern_Fulmar",
+           "Black_footed_Albatross", "Cormorants", "Marbled_Murrelet")
+dens <- dens[,!(names(dens) %in% birds)]
+
 
 # Reclass species names to common names
 for (d in c("dens", "pres", "div", "prod")){
   df <- get(d)
   names(df) <- gsub("_"," ", names(df))
-  names(df)[names(df) == "Fork tailed Storm petrel"] <- "Fork-tailed Storm-petrel"
-  names(df)[names(df) == "Leachs Storm petrel"] <- "Leach's Storm petrel"
-  names(df)[names(df) == "Cassins Auklet"] <- "Cassin's Auklet"
-  names(df)[names(df) == "Red necked Phalarope"] <- "Red-necked Phalarope"
   names(df)[names(df) == "Yelloweye line"] <- "Yelloweye rockfish line"
   names(df)[names(df) == "Div Fish"] <- "Fish Diversity"
   names(df)[names(df) == "Div Invert"] <- "Invert Diversity"
@@ -133,7 +137,7 @@ dfdp$Species <- dfdp$Metric
 
 # -------------------------------------------------#
 # Map function
-MapLayers <- function( griddata, df, type, style="kmeans", size=8){
+MapLayers <- function( griddata, df, type, style="quantile", size=8){
   
   # layers in both grid and df data
   gridlayers <- unique(names(griddata))
@@ -167,8 +171,9 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
       # get breaks
       dat <- Layer@data[,1]
       dat <- dat[!is.na(dat)]
-      if( length(unique(dat)) > 6 ){
-        brksint <- classIntervals( dat, n=6, style=style, intervalClosure="right" )
+      udat <- unique(dat)
+      if( length(udat) > 6 ){
+        brksint <- classIntervals( udat, n=6, style=style, intervalClosure="right" )
       } else {
         brksint <- NULL
         brksint$brks <- unique(dat)
@@ -178,6 +183,7 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
       # break labels
       labels <- sub( ".*,","", brks )
       labels <- as.numeric( sub( "]","", labels ) )
+      labels <- round(labels,3)
       # set zero label
       labels[Layer@data[,1] == 0] <- 0
       # get colours
@@ -267,11 +273,13 @@ MapLayers <- function( griddata, df, type, style="kmeans", size=8){
          compression = "lzw")
     par(mar=c(1,1,1,1))
     plot( bcPoly, col = "grey60", border = NA, xlim = lims$x , ylim = lims$y)
-    plot( Layer, col=Layer$colours, border=NA, add = T )
+    if(p != "Abalone") plot( Layer, col=Layer$colours, border=NA, add = T )
     plot( spdf[!spdf$EBSA %in% e,], add=T, lwd=.6 )
     plot( spdf[spdf$EBSA %in% e,], add=T, lwd=1.1 )
-    legend( "bottomleft", legend = pal$labels, fill = pal$colours,
+    if(p != "Abalone")  legend( "bottomleft", legend = pal$labels, fill = pal$colours,
             title = ltitle, bg = NA, box.col = NA, cex = .8, pt.cex=3, border=NA)
+    if(p == "Abalone") mtext(text = "   Cannot display \n   Abalone locations", 
+                             side = 1, line = -2.5, adj = 0, cex = .8)
     title(p, adj=.05, cex.main = 1 )
     print(insetfig, vp = vp)
     box( lty = 'solid', col = 'black')

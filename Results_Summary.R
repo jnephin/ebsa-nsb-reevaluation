@@ -68,13 +68,17 @@ dat <- merge(dat, spbyebsa, by=c("EBSA","Metric"), all.x=T)
 dat$Imp[is.na(dat$Imp)] <- "n"
 
 
+# remove bird species
+birds <- c("Shearwaters", "Scoters", "Ancient_Murrelet","Large_Gulls",
+           "Red_necked_Phalarope","Common_Murre","Pigeon_Guillemot",
+           "Rhinoceros_Auklet", "Cassins_Auklet", "Leachs_Storm_petrel",
+           "Tufted_Puffin","Fork_tailed_Storm_petrel", "Northern_Fulmar",
+           "Black_footed_Albatross", "Cormorants", "Marbled_Murrelet")
+dat <- dat[!(dat$Metric %in% birds),]
+
 #---------------------------------------------------------#
 # reclass 
 dat$Metric <- gsub("_"," ", dat$Metric )
-dat$Metric[dat$Metric == "Fork tailed Storm petrel"] <- "Fork-tailed Storm-petrel"
-dat$Metric[dat$Metric == "Leachs Storm petrel"] <- "Leach's Storm petrel"
-dat$Metric[dat$Metric == "Cassins Auklet"] <- "Cassin's Auklet"
-dat$Metric[dat$Metric == "Red necked Phalarope"] <- "Red-necked Phalarope"
 dat$Metric[dat$Metric == "Yelloweye line"] <- "Yelloweye rockfish line"
 dat$Metric[dat$Metric == "Div Fish"] <- "Fish Diversity"
 dat$Metric[dat$Metric == "Div Invert"] <- "Invert Diversity"
