@@ -180,13 +180,20 @@ MapLayers <- function( griddata, df, style="quantile", size=8){
         if( length(brksint$brks) == 2 ) colours <-  c("#3288BD","#D53E4F")
         if( length(brksint$brks) > 2 ) colours <- rev(brewer.pal( length(unique(dat)), "Spectral" ))
       }
-      
       # combine colours and breaks
-      pal <- data.frame( labels = na.omit(sort(unique( labels ))), colours = colours,
+      pal <- data.frame( labels = c(sort(unique( labels )),NA), colours = c(colours,"snow2"),
                          stringsAsFactors = FALSE )
+      #set NA label
+      labels[is.na(Layer@data[,1])] <- "No data"
+      pal$labels[is.na(pal$labels)] <- "No data"
       # merge colours with layer data
       Layer@data$labels <- labels
       Layer <- sp::merge( Layer, pal, by = "labels")
+      # label factor levels
+      lev <- unique(sort(as.numeric(
+        as.character(Layer@data$labels[!Layer@data$labels == "No data"])))) 
+      Layer@data$labels <- factor(Layer@data$labels, levels = c(lev, "No data"))
+    }
       
       # Get the vertical and horizontal limits
       ext <- extent( Layer )
@@ -217,7 +224,6 @@ MapLayers <- function( griddata, df, style="quantile", size=8){
       title(p, adj=.05, cex.main = 1 )
       box( lty = 'solid', col = 'black')
       dev.off()
-    }
   } # end loop through layers
 } # End MapLayers function
 # -------------------------------------------------#

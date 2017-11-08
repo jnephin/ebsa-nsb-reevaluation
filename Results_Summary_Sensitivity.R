@@ -22,11 +22,11 @@ setwd('..')
 
 # load data
 #  presence data
-load("Aggregated/EBSA_Presence_Statistics.Rdata") #presdat
+load("Aggregated/EBSA_Presence_Statistics_Sensitivity.Rdata") #presdat
 #  density data
-load("Aggregated/EBSA_Density_Statistics.Rdata") #densdat
+load("Aggregated/EBSA_Density_Statistics_Sensitivity.Rdata") #densdat
 # diversity productivity data
-load("Aggregated/EBSA_DivProd_Statistics.Rdata") #dpdat
+load("Aggregated/EBSA_DivProd_Statistics_Sensitivity.Rdata") #dpdat
 
 # Convert list to data.frame
 dfpres <- melt(presdat, id.vars=c("EBSA","stat","value","lower_CI","upper_CI","ss"))
@@ -46,9 +46,9 @@ cols <- c("EBSA","L1","value","lower_CI","upper_CI")
 df <- rbind(dfdens[cols],dfpres[cols],dfdp[cols])
 colnames(df)[2] <- "Metric"
 
-# seperate outside data
-inside <- df[df$EBSA != "Outside",]
-out <- df[df$EBSA == "Outside",]
+# seperate outside data, use outside small for analysis
+inside <- df[-grep("Outside",df$EBSA),]
+out <- df[df$EBSA == "OutsideSmall",]
 
 # merge inside and out back together
 dat <- merge(inside, out, by="Metric")
@@ -66,7 +66,6 @@ spbyebsa$Imp <- "y"
 # add attribute that indicates whether species was listed as important or not
 dat <- merge(dat, spbyebsa, by=c("EBSA","Metric"), all.x=T)
 dat$Imp[is.na(dat$Imp)] <- "n"
-
 
 
 #---------------------------------------------------------#
@@ -94,7 +93,6 @@ dat$Metric[dat$Metric == "nSp Invert"] <- "Invert Richness"
 dat$Metric[dat$Metric == "Chla mean nsb"] <- "Mean Chla"
 dat$Metric[dat$Metric == "Bloom freq nsb"] <- "Bloom frequency"
 
-
 #---------------------------------------------------------#
 # add result column
 dat$result <- "No"
@@ -103,7 +101,7 @@ dat$result[dat$In_upper > dat$Out_upper &
              dat$In_lower > dat$Out_lower ] <- "Moderate"
 dat$result[dat$In_lower > dat$Out_upper] <- "Strong"
 
-# remove non-important species with no support
+# remove non-important species without strong support
 dat <- dat[!(dat$Imp == "n" & dat$result == "No"),]
   
 # re-organise data
@@ -111,11 +109,8 @@ reorg <- dat %>% group_by(EBSA, Imp, result) %>%
   summarise(species = paste(Metric, collapse = ", ")) %>%
   as.data.frame()
 
-# sort
-reorg <- reorg[order(reorg$EBSA, reorg$Imp, reorg$result),]
-
 # Export as csv
-write.csv(reorg, file= "Output/Tables/Results_Summary.csv", row.names=FALSE)
+write.csv(reorg, file= "Output/Tables/Results_Summary_Sensitivity.csv", row.names=FALSE)
 
 
 

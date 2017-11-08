@@ -28,9 +28,9 @@ setwd('..')
 #---------------------------------------------------------#
 # load data
 #  presence data
-load("Aggregated/EBSA_Presence_Statistics.Rdata") #presdat
+load("Aggregated/EBSA_Presence_Statistics_Sensitivity.Rdata") #presdat
 #  density data
-load("Aggregated/EBSA_Density_Statistics.Rdata") #densdat
+load("Aggregated/EBSA_Density_Statistics_Sensitivity.Rdata") #densdat
 
 # Convert list to data.frame
 dfpres <- melt(presdat, id.vars=c("EBSA","stat","value","lower_CI","upper_CI","ss"))
@@ -63,7 +63,7 @@ for (d in c("dfpres", "dfdens")){
   df <- get(d)
   mer <- merge(spbyebsa, df, by=c("EBSA", "Species"))
   mer$EBSA <- as.character(mer$EBSA)
-  mer <- rbind(mer, df[df$EBSA == "Outside",])
+  mer <- rbind(mer, df[grep("Outside", df$EBSA),])
   assign(d, mer)
 }
 
@@ -78,6 +78,7 @@ for(gdb in gdbs){
   assign(gdb, fc_list)
 }
 
+
 # -------------------------------------------------#
 # Add species groups
 for (d in c("dfpres", "dfdens")){
@@ -91,27 +92,32 @@ for (d in c("dfpres", "dfdens")){
   assign(d, df)
 }
 
-# -------------------------------------------------#
+
+#-------------------------------------------------#
 # Reclass ebsa names to short names
 for (d in c("dfpres", "dfdens")){
   df <- get(d)
-  df$EBSA[df$EBSA == "BellaBellaNearshore"] <- " BB "
-  df$EBSA[df$EBSA == "BrooksPeninsula"] <- " BP "
-  df$EBSA[df$EBSA == "CapeStJames"] <- " CSJ "
-  df$EBSA[df$EBSA == "CentralMainland"] <- " CM "
-  df$EBSA[df$EBSA == "ChathamSound"] <- " CS "
-  df$EBSA[df$EBSA == "DogfishBank"] <- " DB "
-  df$EBSA[df$EBSA == "HaidaGwaiiNearshore"] <- " HG "
-  df$EBSA[df$EBSA == "HecateStraitFront"] <- " HSF "
-  df$EBSA[df$EBSA == "LearmonthBank"] <- " LB "
-  df$EBSA[df$EBSA == "McIntyreBay"] <- " MB "
-  df$EBSA[df$EBSA == "NorthIslandsStraits"] <- " NIS "
-  df$EBSA[df$EBSA == "ScottIslands"] <- " SI "
-  df$EBSA[df$EBSA == "ShelfBreak"] <- " SB "
-  df$EBSA[df$EBSA == "SpongeReefs"] <- " SR "
-  df$EBSA[df$EBSA == "Outside"] <- "OUT"
+  df$EBSA[df$EBSA == "BellaBellaNearshore"] <- " BB"
+  df$EBSA[df$EBSA == "BrooksPeninsula"] <- " BP"
+  df$EBSA[df$EBSA == "CapeStJames"] <- " CSJ"
+  df$EBSA[df$EBSA == "CentralMainland"] <- " CM"
+  df$EBSA[df$EBSA == "ChathamSound"] <- " CS"
+  df$EBSA[df$EBSA == "DogfishBank"] <- " DB"
+  df$EBSA[df$EBSA == "HaidaGwaiiNearshore"] <- " HG"
+  df$EBSA[df$EBSA == "HecateStraitFront"] <- " HSF"
+  df$EBSA[df$EBSA == "LearmonthBank"] <- " LB"
+  df$EBSA[df$EBSA == "McIntyreBay"] <- " MB"
+  df$EBSA[df$EBSA == "NorthIslandsStraits"] <- " NIS"
+  df$EBSA[df$EBSA == "ScottIslands"] <- " SI"
+  df$EBSA[df$EBSA == "ShelfBreak"] <- " SB"
+  df$EBSA[df$EBSA == "SpongeReefs"] <- " SR"
   df$Area <- "In"
-  df$Area[df$EBSA == "OUT"] <- "Out"
+  df$Area[grep("Outside", df$EBSA)] <- "Out"
+  df$EBSA[df$EBSA == "Outside"] <- "OUT"
+  df$EBSA[df$EBSA == "OutsideSmall"] <- "OUTS"
+  df$EBSA[df$EBSA == "OutsideMed"] <- "OUTM"
+  df$EBSA[df$EBSA == "OutsideLarge"] <- "OUTL"
+
   assign(d, df)
 }
 
@@ -123,8 +129,8 @@ for (d in c("dfdens", "dfpres")){
   df$Species <- gsub("_"," ", df$Species)
   df$Species[df$Species == "CassinsAuklet"] <- "Cassin's Auklet"
   df$Species[df$Species == "CommonMurre"] <- "Common Murre"
-  df$Species[df$Species == "GlaucousWingedGull"] <- "Glaucous-Winged Gull"
   df$Species[df$Species == "StormPetrels"] <- "Storm Petrels"
+  df$Species[df$Species == "GlaucousWingedGull"] <- "Glaucous-Winged Gull"
   df$Species[df$Species == "PigeonGuillemot"] <- "Pigeon Guillemot"
   df$Species[df$Species == "RhinocerosAuklet"] <- "Rhinoceros Auklet"
   df$Species[df$Species == "TuftedPuffin"] <- "Tufted Puffin"
@@ -139,11 +145,17 @@ for (d in c("dfdens", "dfpres")){
   assign(d, df)
 }
 
+# add maxval
+dfpres$maxval <- apply(data.frame(dfpres$upper_CI,dfpres$value), 1, max)
+dfdens$maxval <-  apply(data.frame(dfdens$upper_CI,dfdens$value), 1, max)
+
 
 
 # Save dfpres and dfdens to plot with maps
-save(dfdens, file="Aggregated/Denisty_PlotData.Rdata")
-save(dfpres, file="Aggregated/Presence_PlotData.Rdata")
+save(dfdens, file="Aggregated/Denisty_PlotData_Sensitivity.Rdata")
+save(dfpres, file="Aggregated/Presence_PlotData_Sensitivity.Rdata")
+
+
 
 # -------------------------------------------------#
 # plotting functions
@@ -155,7 +167,7 @@ densplot <- function(df, grp, ylab, height, width, ncol, size=size){
   gfig <- ggplot(data = dfsub, aes(x=EBSA,y=value,colour=Area))+
     geom_point(pch=16, size=2.5)+
     geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)+
-    geom_text(aes(label=ss, y=upper_CI), vjust=-.5, size=2.5) +
+    geom_text(aes(label=ss, y=maxval), vjust=-.5, size=2.5) +
     labs(x="", y=ylab)+
     scale_y_continuous(breaks = pretty_breaks(n=4),expand = c(0.2, 0))+
     scale_size_area(max_size = 3, name = "Data \ncoverage\n (%)")+
@@ -168,12 +180,13 @@ densplot <- function(df, grp, ylab, height, width, ncol, size=size){
           axis.ticks = element_line(colour="black"),
           panel.grid= element_blank(),
           axis.ticks.length = unit(0.1,"cm"),
-          axis.text = element_text(size=size, colour = "black"),
+          axis.text.x = element_text(size=size, colour = "black", angle=90, vjust=0.5,hjust=1),
+          axis.text.y = element_text(size=size, colour = "black"),
           axis.title = element_text(size=size+1, colour = "black"),
           panel.spacing = unit(0.1, "lines"),
           legend.key = element_blank(),
-          plot.margin = unit(c(.2,.2,.2,.2), "lines"))
-  tiff(file=file.path("Output/Figures", paste0(grp, ".tif")),
+          plot.margin = unit(c(.1,.2,.1,.2), "lines"))
+  tiff(file=file.path("Output/Figures/Sensitivity", paste0(grp, ".tif")),
        width = width , height = height, units = "in", res = 90)
   print(gfig)
   dev.off()
@@ -187,7 +200,7 @@ presplot <- function(df, grp, ylab, height, width, ncol, size=size){
   gfig <- ggplot(data = dfsub, aes(x=EBSA,y=value,colour=Area))+
     geom_point(pch=16, size=2.5)+
     geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)+
-    geom_text(aes(label=ss, y=upper_CI), vjust=-.5, size=2.5)+
+    geom_text(aes(label=ss, y=maxval), vjust=-.5, size=2.5)+
     labs(x="", y=ylab)+
     scale_y_continuous(breaks = pretty_breaks(n=4),expand = c(0.2, 0))+
     facet_wrap(~Species, scales="free", ncol=ncol)+
@@ -199,11 +212,12 @@ presplot <- function(df, grp, ylab, height, width, ncol, size=size){
           axis.ticks = element_line(colour="black"),
           panel.grid= element_blank(),
           axis.ticks.length = unit(0.1,"cm"),
-          axis.text = element_text(size=size, colour = "black"),
+          axis.text.x = element_text(size=size, colour = "black", angle=90, vjust=0.5,hjust=1),
+          axis.text.y = element_text(size=size, colour = "black"),
           axis.title = element_text(size=size+1, colour = "black"),
           panel.spacing = unit(0.1, "lines"),
-          plot.margin = unit(c(.2,.2,.2,.2), "lines"))
-  tiff(file=file.path("Output/Figures", paste0(grp, ".tif")),
+          plot.margin = unit(c(0,.2,0,.2), "lines"))
+  tiff(file=file.path("Output/Figures/Sensitivity", paste0(grp, ".tif")),
        width = width , height = height, units = "in", res = 90)
   print(gfig)
   dev.off()
@@ -214,17 +228,17 @@ presplot <- function(df, grp, ylab, height, width, ncol, size=size){
 # figures
 # fish
 densplot(df=dfdens, grp="Fish", ylab="Mean Density", 
-       height = 8.5, width = 7, ncol = 4, size = 8)
+         height = 9, width = 7.5, ncol = 4, size = 8)
 # birds
 densplot(df=dfdens, grp="Birds", ylab="Mean Density", 
-       height = 4, width = 7.5, ncol = 4, size = 8)
+         height = 4.5, width = 8, ncol = 4, size = 8)
 # mammals
 densplot(df=dfdens, grp="Cetaceans", ylab="Mean Density", 
-       height = 5.5, width = 5.5, ncol = 2, size = 8)
+         height = 6.5, width = 6.5, ncol = 2, size = 8)
 # inverts
 presplot(df=dfpres, grp="Inverts", ylab="Prevalence (%)", 
-       height = 5.5, width = 5.2, ncol = 3, size = 8)
+         height = 6, width = 6, ncol = 3, size = 8)
 # mm
 presplot(df=dfpres, grp="MM", ylab="Prevalence (%)", 
-         height = 2.5, width = 4.5, ncol = 3, size = 8)
+         height = 3, width = 6, ncol = 3, size = 8)
 

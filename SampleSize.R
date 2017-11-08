@@ -125,14 +125,28 @@ for(s in names(densEBSA)){
 rownames(dens_ss) <- 1:nrow(dens_ss)
 
 
-# remove bird species
-birds <- c("Shearwaters", "Scoters", "Ancient_Murrelet","Large_Gulls",
-           "Red_necked_Phalarope","Common_Murre","Pigeon_Guillemot",
-           "Rhinoceros_Auklet", "Cassins_Auklet", "Leachs_Storm_petrel",
-           "Tufted_Puffin","Fork_tailed_Storm_petrel", "Northern_Fulmar",
-           "Black_footed_Albatross", "Cormorants", "Marbled_Murrelet")
-dtab <- dens_ss[!(dens_ss$Species %in% birds),]
+# -------------------------------------------------#
+# Reclass species names to common names
+dens_ss$Species <- gsub("_"," ", dens_ss$Species)
+dens_ss$Species[dens_ss$Species == "CassinsAuklet"] <- "Cassin's Auklet"
+dens_ss$Species[dens_ss$Species == "CommonMurre"] <- "Common Murre"
+dens_ss$Species[dens_ss$Species == "StormPetrels"] <- "Storm Petrels"
+dens_ss$Species[dens_ss$Species == "GlaucousWingedGull"] <- "Glaucous-Winged Gull"
+dens_ss$Species[dens_ss$Species == "PigeonGuillemot"] <- "Pigeon Guillemot"
+dens_ss$Species[dens_ss$Species == "RhinocerosAuklet"] <- "Rhinoceros Auklet"
+dens_ss$Species[dens_ss$Species == "TuftedPuffin"] <- "Tufted Puffin"
+dens_ss$Species[dens_ss$Species == "Yelloweye line"] <- "Yelloweye rockfish line"
+dens_ss$Species[dens_ss$Species == "Yelloweye line"] <- "Yelloweye rockfish line"
+dens_ss$Species[dens_ss$Species == "RedUrchin"] <- "Red Urchin"
+dens_ss$Species[dens_ss$Species == "GreenUrchin"] <- "Green Urchin"
+dens_ss$Species[dens_ss$Species == "RedSeaCucumber"] <- "Red Sea Cucumber"
+dens_ss$Species[dens_ss$Species == "DungenessCrab"] <- "Dungeness Crab"
+dens_ss$Species[dens_ss$Species == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
+dens_ss$Species[dens_ss$Species == "SeaOtterRange"] <- "Sea Otter Range"
+dens_ss$Species[dens_ss$Species == "SpongeReef"] <- "Sponge Reef"
 
+
+dtab <- dens_ss
 # calculate percent of total sample size
 dtab$Percent <- dtab$SampleSize / dtab$Total * 100
 dtab$Percent <- round(dtab$Percent)

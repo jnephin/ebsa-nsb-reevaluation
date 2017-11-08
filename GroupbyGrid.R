@@ -22,13 +22,15 @@ library(rgeos)
 # Go to parent directory
 setwd('..')
 
+bcalb <- "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+
 # Load grid
 grid <- readOGR(dsn="Grid", layer="NSB_5km")
-
+grid <- spTransform(grid, bcalb)
 
 ## Fish, Marine Mammal and Marine Birds ##
 # load gdb
-gdbs=c("Fish","MarineMammals","MarineBirds")
+gdbs=c("Fish","nMarineMammals","MarineBirds")
 for(gdb in gdbs){
   fc_list = ogrListLayers(paste0("Data/",gdb,".gdb"))
   # Empty dataframe for loop
@@ -38,9 +40,8 @@ for(gdb in gdbs){
     dat <- readOGR(dsn=paste0("Data/",gdb,".gdb"), layer=i)
     # Only retain column of interest
     dat <- dat[i]
-    # assign matching proj4 string
-    if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-    proj4string(grid) <-   proj4string(dat)
+    # proj
+    dat <- spTransform(dat, bcalb)
     # aggregate points using grid
     aggr <- aggregate(dat, grid, FUN="mean", na.rm=T)
     # add to data.frame
@@ -48,12 +49,13 @@ for(gdb in gdbs){
   }
   # Remove SourceKey, x and y columns
   df <- df[,!names(df) %in% c("df", "SourceKey","x","y")]
+  # set row names
+  rownames(df) <- 0:(nrow(grid)-1)
   # add dataframe back onto grid
   assign(gdb, SpatialPolygonsDataFrame(grid, df))
 }
 # Combine
-dens <- SpatialPolygonsDataFrame(grid, cbind(Fish@data,MarineMammals@data, MarineBirds@data))
-proj4string(dens) <- proj4string(Fish)
+dens <- SpatialPolygonsDataFrame(grid, cbind(Fish@data,nMarineMammals@data, MarineBirds@data))
 # Save
 save(dens, file="Aggregated/Grid_DensityData.Rdata")
 
@@ -69,9 +71,8 @@ for(i in fc_list){
   dat <- readOGR(dsn="Data/Diversity.gdb", layer=i)
   # Only retain column of interest
   dat <- dat[i]
-  # assign matching proj4 string
-  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  # proj
+  dat <- spTransform(dat, bcalb)
   # aggregate points using grid
   aggr <- aggregate(dat, grid, FUN="mean", na.rm=T)
   # add to data.frame
@@ -97,9 +98,8 @@ presence_df <- 1:nrow(grid)
 for(i in fc_list){
   # load feature class
   dat <- readOGR(dsn=gdb, layer=i)
-  # assign matching proj4 string
-  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  # proj
+  dat <- spTransform(dat, bcalb)
   # overlay points on grid
   overlay <- over(grid, dat)
   # present = 1
@@ -121,9 +121,8 @@ polygon_df <- 1:nrow(grid)
 for(i in fc_list){
   # load feature class
   dat <- readOGR(dsn=gdb, layer=i)
-  # assign matching proj4 string
-  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  # proj
+  dat <- spTransform(dat, bcalb)
   # overlay points on grid
   overlay <- over(grid, dat)
   # present = 1
@@ -164,9 +163,8 @@ prod_df <- 1:nrow(grid)
 for(i in layers){
   # load feature class
   dat <- get(i)
-  # assign matching proj4 string
-  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  # proj
+  dat <- spTransform(dat, bcalb)
   # aggregate points using grid
   aggr <- aggregate(dat, grid, FUN="mean", na.rm=T)
   # add to data.frame
@@ -198,9 +196,8 @@ for(gdb in gdbs){
     dat <- readOGR(dsn=paste0("Data/",gdb,".gdb"), layer=i)
     # Only retain column of interest
     dat <- dat[i]
-    # assign matching proj4 string
-    if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-    proj4string(grid) <-   proj4string(dat)
+    # proj
+    dat <- spTransform(dat, bcalb)
     # aggregate points using grid
     aggr <- aggregate(dat, grid, FUN="sd", na.rm=T)
     # add to data.frame
@@ -208,12 +205,14 @@ for(gdb in gdbs){
   }
   # Remove SourceKey, x and y columns
   df <- df[,!names(df) %in% c("df", "SourceKey","x","y")]
+  # set row names
+  rownames(df) <- 0:(nrow(grid)-1)
   # add dataframe back onto grid
   assign(gdb, SpatialPolygonsDataFrame(grid, df))
 }
 # Combine
 dens <- SpatialPolygonsDataFrame(grid, cbind(Fish@data,MarineMammals@data, MarineBirds@data))
-proj4string(dens) <- proj4string(Fish)
+
 # Save
 save(dens, file="Aggregated/Grid_DensityData_var.Rdata")
 
@@ -229,9 +228,8 @@ for(i in fc_list){
   dat <- readOGR(dsn="Data/Diversity.gdb", layer=i)
   # Only retain column of interest
   dat <- dat[i]
-  # assign matching proj4 string
-  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  # proj
+  dat <- spTransform(dat, bcalb)
   # aggregate points using grid
   aggr <- aggregate(dat, grid, FUN="sd", na.rm=T)
   # add to data.frame
@@ -264,9 +262,8 @@ prod_df <- 1:nrow(grid)
 for(i in layers){
   # load feature class
   dat <- get(i)
-  # assign matching proj4 string
-  if( !grepl("proj=aea", proj4string(dat)) ) stop( "Data not projected in BC Albers")
-  proj4string(grid) <-   proj4string(dat)
+  # proj
+  dat <- spTransform(dat, bcalb)
   # aggregate points using grid
   aggr <- aggregate(dat, grid, FUN="sd", na.rm=T)
   # add to data.frame

@@ -27,10 +27,8 @@ library(grid)
 setwd('..')
 
 # Create output directories
-dir.create("Output/Maps/Density")
-dir.create("Output/Maps/Diversity")
-dir.create("Output/Maps/Presence")
-dir.create("Output/Maps/Productivity")
+dir.create("Output/Maps/Sensitivity/Density")
+dir.create("Output/Maps/Sensitivity/Presence")
 
 # -------------------------------------------------#
 # List EBSA polygons
@@ -128,13 +126,10 @@ for (d in c("dens", "pres", "div", "prod")){
 
 
 
-
 # -------------------------------------------------#
 # Load data for inset figure 
-load("Aggregated/Denisty_PlotData.Rdata") #dfdens
-load("Aggregated/Presence_PlotData.Rdata") #dfpres
-load("Aggregated/DivProd_PlotData.Rdata") #dfdp
-dfdp$Species <- dfdp$Metric
+load("Aggregated/Denisty_PlotData_Sensitivity.Rdata") #dfdens
+load("Aggregated/Presence_PlotData_Sensitivity.Rdata") #dfpres
 
 
 # -------------------------------------------------#
@@ -151,7 +146,7 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
     
     # EBSAs to bolden
     e <- df$EBSA[df$Species == p]
-    
+
     # Keep only attribute to plot
     Layer <- griddata[p]
     
@@ -212,15 +207,11 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
     # Get the vertical and horizontal limits
     ext <- extent( Layer )
     # Get x and y limits
-    if(type=="Productivity") {
-      lims <- list( x=c(ext@xmin*1.4, ext@xmax*.95), y=c(ext@ymin, ext@ymax*.98) )
-    } else {
-      lims <- list( x=c(ext@xmin*1.15, ext@xmax), y=c(ext@ymin, ext@ymax*.98) )
-    }
+    lims <- list( x=c(ext@xmin*1.15, ext@xmax), y=c(ext@ymin, ext@ymax*.98) )
     
     # subset by species
     dfsub <- df[df$Species == p,]
-    
+
     #y-axis limit and breaks
     brks <- pretty( c(dfsub$value,dfsub$lower_CI,dfsub$upper_CI), n=4 )
     if(max(brks) > max(dfsub$upper_CI, na.rm=T))  brks <- brks[-length(brks)]
@@ -228,10 +219,8 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
     # legend title
     if(type == "Presence"){
       ltitle <- ""
-    } else if(type == "Density" & p != "Herring spawn") {
+    } else if(type == "Density") {
       ltitle <- "Mean Density"
-    } else if(type == "Density" & p == "Herring spawn") {
-      ltitle <- "Mean SHI"
     } else if( p == "Invert Richness" | p == "Fish Richness") {
       ltitle <- "Number of species"
     } else if( p == "Invert Diversity" | p == "Fish Diversity") {
@@ -243,10 +232,13 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
     }
     
     # plot
-    insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
-    insetfig <- insetfig + geom_point(pch=16, size = 2)
+    if(type == "Presence" |  type == "Productivity") 
+      insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
+    if( !(type == "Presence" | type == "Productivity") ) 
+      insetfig <- ggplot(data = dfsub, aes(x=EBSA,y=value))
+    insetfig <- insetfig + geom_point(pch=16, size=2)
     insetfig <- insetfig + geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)
-    insetfig <- insetfig + geom_text(aes(label=ss, y=upper_CI), vjust=-1, size=2.5)
+    insetfig <- insetfig + geom_text(aes(label=ss, y=upper_CI), vjust=-1.5, size=2)
     if(type == "Presence"){
       insetfig <- insetfig + labs(x="", y="Occurrence (%)")
     } else {
@@ -261,7 +253,10 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
                                  axis.ticks = element_line(colour="black"),
                                  panel.grid= element_blank(),
                                  axis.ticks.length = unit(0.1,"cm"),
-                                 axis.text = element_text(size=size, colour = "black"),
+                                 axis.text.x = element_text(size=size, 
+                                                            colour = "black", 
+                                                            angle = 90, vjust=0.5, hjust=1),
+                                 axis.text.y = element_text(size=size, colour = "black"),
                                  axis.title = element_text(size=size+1, colour = "black"),
                                  panel.spacing = unit(0.1, "lines"),
                                  legend.key = element_blank(),
@@ -273,34 +268,20 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
                                  legend.title = element_text(size=size+1, colour = "black"),
                                  plot.margin = unit(c(1,1,1,1), "lines"))
     
-    if(type=="Diversity" | type=="Productivity") insetfig <- insetfig + 
-      theme(axis.text.x = element_text(size=size, colour = "black", angle = 90, vjust=0.5, hjust=1))
-    
     #A viewport taking up a fraction of the plot area
-    if(type=="Productivity") {
-      vp <- viewport(width = 0.64, height = 0.45, x = 1, y = 1, just=c(1,1))
-    } else {
-      vp <- viewport(width = 0.58, height = 0.45, x = 1, y = 1, just=c(1,1))
-    }
+    vp <- viewport(width = 0.62, height = 0.45, x = 1, y = 1, just=c(1,1))
     
     # Export Figure
-    if(type=="Productivity") {
-      tiff(file=file.path("Output/Maps", type, paste0(p, ".tif")),
-           width = 5.3 , height = 5.25, units = "in", res = 300,
-           compression = "lzw")    
-    } else {
-      tiff(file=file.path("Output/Maps", type, paste0(p, ".tif")),
-           width = 4.8 , height = 5.25, units = "in", res = 300,
-           compression = "lzw")
-    }
-    
+    tiff(file=file.path("Output/Maps/Sensitivity", type, paste0(p, ".tif")),
+         width = 4.8 , height = 5.25, units = "in", res = 300,
+         compression = "lzw")
     par(mar=c(1,1,1,1))
     plot( bcPoly, col = "grey60", border = NA, xlim = lims$x , ylim = lims$y)
     if(p != "Abalone") plot( Layer, col=Layer$colours, border=NA, add = T )
     plot( spdf[!spdf$EBSA %in% e,], add=T, lwd=.6 )
     plot( spdf[spdf$EBSA %in% e,], add=T, lwd=1.1 )
     if(p != "Abalone")  legend( "bottomleft", legend = pal$labels, fill = pal$colours,
-                                title = ltitle, bg = NA, box.col = NA, cex = .8, pt.cex=3, border=NA)
+            title = ltitle, bg = NA, box.col = NA, cex = .8, pt.cex=3, border=NA)
     if(p == "Abalone") mtext(text = "   Cannot display \n   Abalone locations", 
                              side = 1, line = -2.5, adj = 0, cex = .8)
     title(p, adj=.05, cex.main = 1 )
@@ -316,6 +297,5 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
 # Maps
 MapLayers( griddata = dens, df=dfdens, type = "Density" )
 MapLayers( griddata = pres, df=dfpres,  type = "Presence" )
-MapLayers( griddata = div, df=dfdp, type = "Diversity" )
-MapLayers( griddata = prod, df=dfdp, type = "Productivity" )
+
 

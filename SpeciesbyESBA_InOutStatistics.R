@@ -86,6 +86,7 @@ for(s in names(densEBSA)){
       # subset the data to include only species data in the inside cells of ebsa == e
       datsub <- data.frame(sp=spdf@data[,1],spdf@data[e])
       spdat <- datsub$sp[datsub[e] == 1]
+      ssn <- length(spdat[!is.na(spdat)])
       
       # Compute statistics of sample data
       sp_mean <- mean(spdat, na.rm=TRUE)
@@ -103,20 +104,19 @@ for(s in names(densEBSA)){
       # Compute statistics of the bootstrap samples
       boot_mean <- apply(bootstrapsample, 2, mean, na.rm=TRUE)
       boot_pPres <- apply(bootstrapsample, 2, pPres) * 100
-      boot_pNA  <- apply(bootstrapsample, 2, pNA) * 100
-      
+
       # Find the 0.05 and 0.95 quantile for each statistic
       # 95% CI using the percentile method
-      q_mean = quantile(boot_mean, c(0.025, 0.975), na.rm=TRUE)
-      q_pPres = quantile(boot_pPres, c(0.025, 0.975), na.rm=TRUE)
-      q_pNA = quantile(boot_pNA, c(0.025, 0.975), na.rm=TRUE)
-      
+      q_mean <- quantile(boot_mean, c(0.025, 0.975), na.rm=TRUE)
+      q_pPres <- quantile(boot_pPres, c(0.025, 0.975), na.rm=TRUE)
+
       # Bind together
       stats <- c(sp_mean,sp_pPres,sp_pNA)
-      lower <- c(q_mean[1],q_pPres[1],q_pNA[1])
-      upper <-c(q_mean[2],q_pPres[2],q_pNA[2])
+      lower <- c(q_mean[1],q_pPres[1],NA)
+      upper <-c(q_mean[2],q_pPres[2],NA)
       df <- data.frame(EBSA = e, stat = c("mean","pPres","pNA"),
                        value = stats,lower_CI = lower, upper_CI = upper,
+                       ss = rep(ssn,3),
                        stringsAsFactors = FALSE)
       dat <- rbind(dat, df)
     }
@@ -160,6 +160,7 @@ for( s in names(presEBSA) ){
       # subset the data to include only species data in the inside cells of ebsa == e
       datsub <- data.frame(sp=spdf@data[,1],spdf@data[e])
       spdat <- datsub$sp[datsub[e] == 1]
+      ssn <- length(spdat[!is.na(spdat)])
       
       # Compute statistics of sample data
       sp_pPres <- pPres(spdat)*100
@@ -188,6 +189,7 @@ for( s in names(presEBSA) ){
       upper <-c(q_pPres[2],q_pNA[2])
       df <- data.frame(EBSA = e, stat = c("pPres","pNA"),
                        value = stats,lower_CI = lower, upper_CI = upper,
+                       ss = rep(ssn,2),
                        stringsAsFactors = FALSE)
       dat <- rbind(dat, df)
     }

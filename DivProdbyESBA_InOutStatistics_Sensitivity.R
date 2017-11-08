@@ -52,6 +52,7 @@ dpdat <- list()
 
 # loop through each metric
 for(s in names(comb)){
+  
     # aggregated data
     spdf <- comb[[s]]
 
@@ -60,10 +61,29 @@ for(s in names(comb)){
     outindex <- which(apply(out, 1, sum) == 0)
     spdf@data$Outside <- 0
     spdf@data$Outside[outindex] <- 1
+    spdf@data$OutsideSmall <- spdf@data$Outside
+    spdf@data$OutsideMed <- spdf@data$Outside
+    spdf@data$OutsideLarge <- spdf@data$Outside
     
     # esbas (including outside area)
     ebsa <- names(spdf)[-1]
-  
+    
+    # mean sample size inside EBSAs of interest
+    indat <- spdf@data[s]
+    out[out == 0] <- NA
+    ess <- c(indat) * out
+    ss <- apply(ess, 2, function(x) length(x[!is.na(x)]))
+    mss <- round(mean(ss))
+    
+    # sample size outside EBSAs of interest
+    outside <- spdf@data$Outside
+    outside[outside == 0] <- NA
+    outsidenona <- indat * outside
+    outss <- length(outsidenona[!is.na(outsidenona)])
+    
+    # range of sample sizes
+    ssrange <- round(seq(from = mss, to = outss, by = ((outss - mss)/(3))))
+    
     # empty
     dat <- NULL
     # loop through ebsas including outside of ebsa area
@@ -74,15 +94,29 @@ for(s in names(comb)){
       spdat <- datsub$sp[datsub[i] == 1]
       ssn <- length(spdat[!is.na(spdat)])
       
+      # remove na values
+      rmna <- spdat[!is.na(spdat)]
+      
       # Compute statistics of sample data
       sp_mean <- mean(spdat, na.rm=TRUE)
       sp_pNA <- pNA(spdat)*100
       
+      # overwrite mean calc for outside sensitivity analysis
+      if(i == "OutsideSmall"){
+        sp_mean <- mean(sample(rmna,ssrange[1], replace = FALSE))
+      } else if(i == "OutsideMed"){
+        sp_mean <- mean(sample(rmna,ssrange[2], replace = FALSE))
+      } else if(i == "OutsideLarge"){
+        sp_mean <- mean(sample(rmna,ssrange[3], replace = FALSE))
+      }
+      
       # Number of bootstrap samples
       nboot <- 10000
       # Generate bootstrap samples, i.e. an array of n x nboot 
-      rmna <- spdat[!is.na(spdat)]
       n <- length(rmna)
+      if (i == "OutsideSmall") {n <- ssrange[1]; ssn <- ssrange[1]} # rarefy sample size
+      if (i == "OutsideMed") {n <- ssrange[2];  ssn <- ssrange[2]}# rarefy sample size
+      if (i == "OutsideLarge") {n <- ssrange[3]; ssn <- ssrange[3]}# rarefy sample size
       tmpdata = sample(rmna,n*nboot, replace=TRUE)
       bootstrapsample = matrix(tmpdata, nrow=n, ncol=nboot)
       
@@ -112,5 +146,5 @@ for(s in names(comb)){
 
 
 # save survey data
-save(dpdat, file="Aggregated/EBSA_DivProd_Statistics.Rdata")
+save(dpdat, file="Aggregated/EBSA_DivProd_Statistics_Sensitivity.Rdata")
 
