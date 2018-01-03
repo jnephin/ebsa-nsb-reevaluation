@@ -72,20 +72,21 @@ ebsas <- c("HecateStraitFront","BellaBellaNearshore","BrooksPeninsula","CapeStJa
 # Species important to each EBSA
 
 HecateStraitFront <- NULL
-McIntyreBay <-  c("DungenessCrab","Halibut","Herring",
+McIntyreBay <-  c("Dungeness_Crab","Halibut","Herring",
                   "Killer_Whale","Humpback_Whale") #"Eulachon", "Scoters"
-DogfishBank <-  c("DungenessCrab") # "GlaucousWingedGull" no colonies within DB
+DogfishBank <-  c("Dungeness_Crab") # "GlaucousWingedGull" no colonies within DB
                  #"AncientMurrelet","Scoters", "Shearwaters", "Red_necked_Phalarope"
-LearmonthBank  <-  c("Fin_Whale","Gray_Whale") #"Corals", "Ancient_Murrelet", "CommonMurre","PigeonGuillemot", "RhinocerosAuklet" no colonies within learmonth bank
+LearmonthBank  <-  c("Fin_Whale","Gray_Whale","Coral")# "Ancient_Murrelet", "CommonMurre","PigeonGuillemot", "RhinocerosAuklet" no colonies within learmonth bank
 BrooksPeninsula <- c("SeaOtterRange","Lingcod_line","TuftedPuffin",
-                     "GlaucousWingedGull") #"Shearwaters","RhinocerosAuklet","CommonMurre",
+                     "GlaucousWingedGull","Tanner_Crab") 
+                    #"Shearwaters","RhinocerosAuklet","CommonMurre",
 CapeStJames <- c("Halibut", "Halibut_line","StellarSeaLionRookeries",
-                 "Humpback_Whale","Blue_Whale","Fin_Whale")#"Sponges", "Corals","Shearwaters"
+                 "Humpback_Whale","Blue_Whale","Fin_Whale","Sponge", "Coral", "Seapen")#"Shearwaters"
 ShelfBreak <- c("Pacific_hake","Humpback_Whale","Sperm_Whale", "Blue_Whale",
-                "Fin_Whale","Sablefish","Dover_sole",
+                "Fin_Whale","Sablefish","Dover_sole", "Tanner_Crab",
                 "Pacific_Ocean_perch","Yellowtail_rockfish","Yellowmouth_rockfish",
-                "Gray_Whale","CassinsAuklet","RhinocerosAuklet","StormPetrels","TuftedPuffin") 
-                #"Eulachon","Sponges", "Corals","TannerCrab"
+                "Gray_Whale","CassinsAuklet","RhinocerosAuklet","StormPetrels","TuftedPuffin",
+                "Coral", "Seapen", "Sponge") #"Eulachon"
                 # lonline rockfish data does not have enough coverage on the shelf to meet 20% rule
 ScottIslands <-  c("SeaOtterRange","Gray_Whale","Humpback_Whale","StellarSeaLionRookeries",
                    "Pacific_cod","Lingcod","Lingcod_line","Sablefish",
@@ -96,20 +97,20 @@ ScottIslands <-  c("SeaOtterRange","Gray_Whale","Humpback_Whale","StellarSeaLion
                    "Rock_sole", "Dover_sole", "English_sole") 
                   #"Black_footed_Albatross", "Northern_Fulmar","Shearwaters"
 NorthIslandsStraits <- c("Killer_Whale","Gray_Whale", "Humpback_Whale",
-                         "Shrimp","Prawn","GreenUrchin","SeaOtterRange","StormPetrels",
+                         "Shrimp","Prawn","Green_Urchin","SeaOtterRange","StormPetrels",
                          "RhinocerosAuklet") 
 SpongeReefs <-  c("SpongeReef")
-ChathamSound  <- c("GreenUrchin","DungenessCrab","Shrimp","Herring_spawn","Killer_Whale",
+ChathamSound  <- c("Green_Urchin","Dungeness_Crab","Shrimp","Herring_spawn","Killer_Whale",
                    "Humpback_Whale") #"Scoters"
-HaidaGwaiiNearshore <- c("Fin_Whale","Humpback_Whale","Gray_Whale","RedUrchin",
-                         "RedSeaCucumber","Abalone", "Herring_spawn",
+HaidaGwaiiNearshore <- c("Fin_Whale","Humpback_Whale","Gray_Whale","Red_Urchin",
+                         "Red_Sea_Cucumber","Abalone", "Herring_spawn",
                          "Pacific_cod","StellarSeaLionRookeries","Arrowtooth_flounder",
                          "Petrale_sole", "Butter_sole", "Rock_sole", "Dover_sole", 
                          "English_sole") #"Shearwaters",
 CentralMainland  <- c("SeaOtterRange","StellarSeaLionRookeries","Killer_Whale","Fin_Whale",
-                      "Humpback_Whale","Gray_Whale","RedSeaCucumber",
+                      "Humpback_Whale","Gray_Whale","Red_Sea_Cucumber",
                       "Sablefish_line") #"Shearwaters"
-BellaBellaNearshore <- c("SeaOtterRange","Geoduck","RedUrchin","RedSeaCucumber",
+BellaBellaNearshore <- c("SeaOtterRange","Geoduck","Red_Urchin","Red_Sea_Cucumber",
                          "Shrimp","Killer_Whale","Herring_spawn")
 
 # all important species

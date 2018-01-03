@@ -28,9 +28,9 @@ bcalb <- "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_
 grid <- readOGR(dsn="Grid", layer="NSB_5km")
 grid <- spTransform(grid, bcalb)
 
-## Fish, Marine Mammal and Marine Birds ##
+## Fish, SpongeCorals, Marine Mammal and Marine Birds ##
 # load gdb
-gdbs=c("Fish","nMarineMammals","MarineBirds")
+gdbs=c("Fish","MarineMammals","MarineBirds", "SpongeCoral")
 for(gdb in gdbs){
   fc_list = ogrListLayers(paste0("Data/",gdb,".gdb"))
   # Empty dataframe for loop
@@ -55,7 +55,8 @@ for(gdb in gdbs){
   assign(gdb, SpatialPolygonsDataFrame(grid, df))
 }
 # Combine
-dens <- SpatialPolygonsDataFrame(grid, cbind(Fish@data,nMarineMammals@data, MarineBirds@data))
+dens <- SpatialPolygonsDataFrame(grid, cbind(Fish@data,MarineMammals@data, 
+                                             MarineBirds@data, SpongeCoral@data))
 # Save
 save(dens, file="Aggregated/Grid_DensityData.Rdata")
 
@@ -149,8 +150,8 @@ save(pres, file="Aggregated/Grid_PresenceData.Rdata")
 
 ## Productivity Data ##
 # load chla layer (includes straylight)
-chla <- raster("Data/Productivity/Chla_mean_straylight.tif")
-bloom <- raster("Data/Productivity/Bloom_freq_straylight.tif")
+chla <- raster("Data/Productivity/Chla_mean_nsb.tif")
+bloom <- raster("Data/Productivity/Bloom_freq_nsb.tif")
 
 # Conver to spatial points
 spchla <- rasterToPoints(chla, spatial=TRUE)
@@ -184,9 +185,9 @@ save(prod, file="Aggregated/Grid_ProductivityData.Rdata")
 # Variance
 
 
-## Fish, Marine Mammal and Marine Birds ##
+## Fish, SpongeCorals, Marine Mammal and Marine Birds ##
 # load gdb
-gdbs=c("Fish","MarineMammals","MarineBirds")
+gdbs=c("Fish","MarineMammals","MarineBirds", "SpongeCoral")
 for(gdb in gdbs){
   fc_list = ogrListLayers(paste0("Data/",gdb,".gdb"))
   # Empty dataframe for loop
@@ -211,7 +212,8 @@ for(gdb in gdbs){
   assign(gdb, SpatialPolygonsDataFrame(grid, df))
 }
 # Combine
-dens <- SpatialPolygonsDataFrame(grid, cbind(Fish@data,MarineMammals@data, MarineBirds@data))
+dens <- SpatialPolygonsDataFrame(grid, cbind(Fish@data,MarineMammals@data, 
+                                             MarineBirds@data, SpongeCoral@data))
 
 # Save
 save(dens, file="Aggregated/Grid_DensityData_var.Rdata")
@@ -248,8 +250,8 @@ save(div, file="Aggregated/Grid_DiversityData_var.Rdata")
 
 ## Productivity Data ##
 # load chla layer (includes straylight)
-chla <- raster("Data/Productivity/Chla_mean_straylight.tif")
-bloom <- raster("Data/Productivity/Bloom_freq_straylight.tif")
+chla <- raster("Data/Productivity/Chla_mean_nsb.tif")
+bloom <- raster("Data/Productivity/Bloom_freq_nsb.tif")
 
 # Conver to spatial points
 spchla <- rasterToPoints(chla, spatial=TRUE)
@@ -274,5 +276,3 @@ prod <- SpatialPolygonsDataFrame(grid, prod_df[-1])
 # Save
 names(prod) <- c("Chla_mean_nsb","Bloom_freq_nsb")
 save(prod, file="Aggregated/Grid_ProductivityData_var.Rdata")
-
-

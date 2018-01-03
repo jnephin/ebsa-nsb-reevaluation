@@ -26,6 +26,9 @@ library(grid)
 # Go to parent directory
 setwd('..')
 
+# options
+options(scipen=999)
+
 # Create output directories
 dir.create("Output/Maps/Variance")
 
@@ -94,40 +97,37 @@ load(file="Aggregated/Grid_ProductivityData_var.Rdata") #prod
 load(file="Aggregated/Grid_DiversityData_var.Rdata") #div
 
 
-# remove bird species
-birds <- c("Shearwaters", "Scoters", "Ancient_Murrelet","Large_Gulls",
-           "Red_necked_Phalarope","Common_Murre","Pigeon_Guillemot",
-           "Rhinoceros_Auklet", "Cassins_Auklet", "Leachs_Storm_petrel",
-           "Tufted_Puffin","Fork_tailed_Storm_petrel", "Northern_Fulmar",
-           "Black_footed_Albatross", "Cormorants", "Marbled_Murrelet")
-dens <- dens[,!(names(dens) %in% birds)]
-
-
-load("Aggregated/Denisty_PlotData.Rdata") #dfdens
-load("Aggregated/DivProd_PlotData.Rdata") #dfdp
-dfdp$Species <- dfdp$Metric
-
+# -------------------------------------------------#
 # Reclass species names to common names
 for (d in c("dens", "div", "prod")){
   df <- get(d)
   names(df) <- gsub("_"," ", names(df))
-  names(df)[names(df) == "Yelloweye line"] <- "Yelloweye rockfish line"
+  names(df)[names(df) == "CassinsAuklet"] <- "Cassin's Auklet"
+  names(df)[names(df) == "CommonMurre"] <- "Common Murre"
+  names(df)[names(df) == "StormPetrels"] <- "Storm Petrels"
+  names(df)[names(df) == "PigeonGuillemot"] <- "Pigeon Guillemot"
+  names(df)[names(df) == "GlaucousWingedGull"] <- "Glaucous-Winged Gull"
+  names(df)[names(df) == "RhinocerosAuklet"] <- "Rhinoceros Auklet"
+  names(df)[names(df) == "TuftedPuffin"] <- "Tufted Puffin"
+  names(df)[names(df) == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
+  names(df)[names(df) == "SeaOtterRange"] <- "Sea Otter Range"
+  names(df)[names(df) == "SpongeReef"] <- "Sponge Reef"
   names(df)[names(df) == "Div Fish"] <- "Fish Diversity"
   names(df)[names(df) == "Div Invert"] <- "Invert Diversity"
   names(df)[names(df) == "nSp Fish"] <- "Fish Richness"
   names(df)[names(df) == "nSp Invert"] <- "Invert Richness"
   names(df)[names(df) == "Chla mean nsb"] <- "Mean Chla"
   names(df)[names(df) == "Bloom freq nsb"] <- "Bloom frequency"
-  names(df)[names(df) == "RedUrchin"] <- "Red Urchin"
-  names(df)[names(df) == "GreenUrchin"] <- "Green Urchin"
-  names(df)[names(df) == "RedSeaCucumber"] <- "Red Sea Cucumber"
-  names(df)[names(df) == "DungenessCrab"] <- "Dungeness Crab"
-  names(df)[names(df) == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
-  names(df)[names(df) == "SeaOtterRange"] <- "Sea Otter Range"
-  names(df)[names(df) == "TannerCrab"] <- "Tanner Crab"
-  names(df)[names(df) == "SpongeReef"] <- "Sponge Reef"
   assign(d, df)
 }
+
+
+# -------------------------------------------------#
+# Load data 
+load("Aggregated/Denisty_PlotData.Rdata") #dfdens
+load("Aggregated/Presence_PlotData.Rdata") #dfpres
+load("Aggregated/DivProd_PlotData.Rdata") #dfdp
+dfdp$Species <- dfdp$Metric
 
 
 # -------------------------------------------------#
@@ -164,7 +164,11 @@ MapLayers <- function( griddata, df, style="quantile", size=8){
         # break labels
         labels <- sub( ".*,","", brks )
         labels <- as.numeric( sub( "]","", labels ) )
-        labels <- round(labels,3)
+        if (p %in% c("Sponge", "Seapen","Coral")){
+          labels <- round(labels,5)
+        } else {
+          labels <- round(labels,3)
+        }
         # set zero label
         labels[Layer@data[,1] == 0] <- 0
         # get colours
@@ -198,7 +202,7 @@ MapLayers <- function( griddata, df, style="quantile", size=8){
       # Get the vertical and horizontal limits
       ext <- extent( Layer )
       # Get x and y limits
-      lims <- list( x=c(ext@xmin*1.15, ext@xmax), y=c(ext@ymin, ext@ymax*.98) )
+      lims <- list( x=c(ext@xmin*1.05, ext@xmax), y=c(ext@ymin, ext@ymax*.98) )
       
       # subset by species
       dfsub <- df[df$Species == p,]

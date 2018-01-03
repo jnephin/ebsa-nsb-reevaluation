@@ -24,6 +24,9 @@ library(rgdal)
 # Go to parent directory
 setwd('..')
 
+# make dirs
+dir.create("Output/Figures/Sensitivity/Presence", recursive = T)
+dir.create("Output/Figures/Sensitivity/Density", recursive = T)
 
 #---------------------------------------------------------#
 # load data
@@ -71,13 +74,12 @@ for (d in c("dfpres", "dfdens")){
 #---------------------------------------------------------#
 
 #  species by groups
-gdbs=c("Fish","MarineMammals","MarineBirds","Invert")
+gdbs=c("Fish","MarineMammals","MarineBirds","Invert","SpongeCoral")
 groups <- NULL
 for(gdb in gdbs){
   fc_list <- ogrListLayers(paste0("Data/",gdb,".gdb"))
   assign(gdb, fc_list)
 }
-
 
 # -------------------------------------------------#
 # Add species groups
@@ -87,10 +89,11 @@ for (d in c("dfpres", "dfdens")){
   df$Group[df$Species %in% Fish] <- "Fish"
   df$Group[df$Species %in% MarineBirds] <- "Birds"
   df$Group[df$Species %in% MarineMammals] <- "Cetaceans"
-  df$Group[df$Species %in% c(Invert,"SpongeReef")] <- "Inverts"
+  df$Group[df$Species %in% c(Invert,"SpongeReef", SpongeCoral)] <- "Inverts"
   df$Group[df$Species %in% c("StellarSeaLionRookeries","SeaOtterRange")] <- "MM"
   assign(d, df)
 }
+
 
 
 #-------------------------------------------------#
@@ -134,11 +137,6 @@ for (d in c("dfdens", "dfpres")){
   df$Species[df$Species == "PigeonGuillemot"] <- "Pigeon Guillemot"
   df$Species[df$Species == "RhinocerosAuklet"] <- "Rhinoceros Auklet"
   df$Species[df$Species == "TuftedPuffin"] <- "Tufted Puffin"
-  df$Species[df$Species == "Yelloweye line"] <- "Yelloweye rockfish line"
-  df$Species[df$Species == "RedUrchin"] <- "Red Urchin"
-  df$Species[df$Species == "GreenUrchin"] <- "Green Urchin"
-  df$Species[df$Species == "RedSeaCucumber"] <- "Red Sea Cucumber"
-  df$Species[df$Species == "DungenessCrab"] <- "Dungeness Crab"
   df$Species[df$Species == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
   df$Species[df$Species == "SeaOtterRange"] <- "Sea Otter Range"
   df$Species[df$Species == "SpongeReef"] <- "Sponge Reef"
@@ -186,7 +184,7 @@ densplot <- function(df, grp, ylab, height, width, ncol, size=size){
           panel.spacing = unit(0.1, "lines"),
           legend.key = element_blank(),
           plot.margin = unit(c(.1,.2,.1,.2), "lines"))
-  tiff(file=file.path("Output/Figures/Sensitivity", paste0(grp, ".tif")),
+  tiff(file=file.path("Output/Figures/Sensitivity/Density", paste0(grp, ".tif")),
        width = width , height = height, units = "in", res = 90)
   print(gfig)
   dev.off()
@@ -217,7 +215,7 @@ presplot <- function(df, grp, ylab, height, width, ncol, size=size){
           axis.title = element_text(size=size+1, colour = "black"),
           panel.spacing = unit(0.1, "lines"),
           plot.margin = unit(c(0,.2,0,.2), "lines"))
-  tiff(file=file.path("Output/Figures/Sensitivity", paste0(grp, ".tif")),
+  tiff(file=file.path("Output/Figures/Sensitivity/Presence", paste0(grp, ".tif")),
        width = width , height = height, units = "in", res = 90)
   print(gfig)
   dev.off()
@@ -229,6 +227,9 @@ presplot <- function(df, grp, ylab, height, width, ncol, size=size){
 # fish
 densplot(df=dfdens, grp="Fish", ylab="Mean Density", 
          height = 9, width = 7.5, ncol = 4, size = 8)
+# density inverts
+densplot(df=dfdens, grp="Inverts", ylab="Mean Density", 
+         height = 2.7, width = 7.5, ncol = 3, size = 8)
 # birds
 densplot(df=dfdens, grp="Birds", ylab="Mean Density", 
          height = 4.5, width = 8, ncol = 4, size = 8)

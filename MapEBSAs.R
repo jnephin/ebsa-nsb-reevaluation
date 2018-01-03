@@ -32,6 +32,9 @@ dir.create("Output/Maps/Diversity")
 dir.create("Output/Maps/Presence")
 dir.create("Output/Maps/Productivity")
 
+# options
+options(scipen=999)
+
 # -------------------------------------------------#
 # List EBSA polygons
 gdb <- "EBSA_Polygons/EBSAs.gdb"
@@ -185,7 +188,11 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
       # break labels
       labels <- sub( ".*,","", brks )
       labels <- as.numeric( sub( "]","", labels ) )
-      labels <- round(labels,3)
+      if (p %in% c("Sponge", "Seapen","Coral")){
+        labels <- round(labels,5)
+      } else {
+        labels <- round(labels,3)
+      }
       # set zero label
       labels[Layer@data[,1] == 0] <- 0
       # get colours

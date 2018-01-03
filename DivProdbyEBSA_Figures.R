@@ -89,6 +89,8 @@ dfdp$Metric[dfdp$Metric == "Bloom_freq_nsb"] <- "Bloom frequency"
 # Save dfdp to plot with maps
 save(dfdp, file="Aggregated/DivProd_PlotData.Rdata")
 
+
+
 # -------------------------------------------------#
 # plotting function
 
