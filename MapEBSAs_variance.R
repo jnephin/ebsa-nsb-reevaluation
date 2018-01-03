@@ -234,7 +234,7 @@ MapLayers <- function( griddata, df, style="quantile", size=8){
 
 
 # Maps
-MapLayers( griddata = dens, df=dfdens) # density
-MapLayers( griddata = prod, df=dfdp) #  prod
-MapLayers( griddata = div, df=dfdp) # div 
+MapLayers( griddata = dens, df=dfdens ) # density
+MapLayers( griddata = prod, df=dfdp ) #  prod
+MapLayers( griddata = div, df=dfdp ) # div 
 

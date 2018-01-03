@@ -57,11 +57,23 @@ writeRaster(rbloom, "Data/Productivity/Bloom_freq_nsb.tif", overwrite=T)
 
 
 # -------------------------------------------------#
-# convert to polgyon for plot
-chlapoly <- rasterToPolygons(unc_chla)
-bloompoly <- rasterToPolygons(unc_bloom)
+# create hot spot rasters
+# 3 mg m^-3 threshold reported for the study area (Mackas et al. 2007).
 
-# save
-prodpoly <- list(Chla_mean_nsb=chlapoly,Bloom_freq_nsb=bloompoly)
-save(prodpoly, file = "Aggregated/ProductivityPolygons.RData")
+# chla mean hotspots
+quantile(getValues(rchla), na.rm=T, probs=seq(0,1,.1))
+m <- c(-Inf, 5.0568584, 0,  5.0568584, Inf, 1)
+rclmat <- matrix(m, ncol=3, byrow=TRUE)
+chlahotspot <- reclassify(rchla, rclmat)
+
+# chla mean hotspots
+quantile(getValues(rbloom), na.rm=T, probs=seq(0,1,.1))
+m <- c(-Inf, 19, 0,  19, Inf, 1)
+rclmat <- matrix(m, ncol=3, byrow=TRUE)
+bloomhotspot <- reclassify(rbloom, rclmat)
+
+# -------------------------------------------------#
+# write 
+writeRaster(chlahotspot, "Data/Productivity/Chla_mean_nsb_hotspots.tif", overwrite=T)
+writeRaster(bloomhotspot, "Data/Productivity/Bloom_freq_nsb_hotspot.tif", overwrite=T)
 
