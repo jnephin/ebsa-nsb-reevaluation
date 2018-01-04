@@ -117,7 +117,7 @@ for (d in c("dens", "pres", "div", "prod")){
   names(df)[names(df) == "GreenUrchin"] <- "Green Urchin"
   names(df)[names(df) == "RedSeaCucumber"] <- "Red Sea Cucumber"
   names(df)[names(df) == "DungenessCrab"] <- "Dungeness Crab"
-  names(df)[names(df) == "StellarSeaLionRookeries"] <- "Stellar Sea Lion Rookeries"
+  names(df)[names(df) == "StellarSeaLionRookeries"] <- "Steller Sea Lion Rookeries"
   names(df)[names(df) == "SeaOtterRange"] <- "Sea Otter Range"
   names(df)[names(df) == "SpongeReef"] <- "Sponge Reef"
   names(df)[names(df) == "Div Fish"] <- "Fish Diversity"
@@ -138,6 +138,9 @@ load("Aggregated/Denisty_PlotData.Rdata") #dfdens
 load("Aggregated/Presence_PlotData.Rdata") #dfpres
 load("Aggregated/DivProd_PlotData.Rdata") #dfdp
 dfdp$Species <- dfdp$Metric
+
+dfpres$Species[dfpres$Species == "Stellar Sea Lion Rookeries"] <- "Steller Sea Lion Rookeries"
+
 
 
 # -------------------------------------------------#
@@ -285,7 +288,7 @@ MapLayers <- function( griddata, df, type, style="quantile", size=8){
     
     #A viewport taking up a fraction of the plot area
     if(type=="Productivity") {
-      vp <- viewport(width = 0.64, height = 0.45, x = 1, y = 1, just=c(1,1))
+      vp <- viewport(width = 0.66, height = 0.45, x = 1, y = 1, just=c(1,1))
     } else {
       vp <- viewport(width = 0.58, height = 0.45, x = 1, y = 1, just=c(1,1))
     }

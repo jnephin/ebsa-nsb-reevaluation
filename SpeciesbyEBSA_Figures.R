@@ -202,7 +202,7 @@ presplot <- function(df, grp, ylab, height, width, ncol, size=size){
           axis.ticks.length = unit(0.1,"cm"),
           axis.text = element_text(size=size, colour = "black"),
           axis.title = element_text(size=size+1, colour = "black"),
-          panel.spacing = unit(0.1, "lines"),
+          panel.spacing = unit(0.2, "lines"),
           plot.margin = unit(c(.2,.2,.2,.2), "lines"))
   tiff(file=file.path("Output/Figures/Presence", paste0(grp, ".tif")),
        width = width , height = height, units = "in", res = 90)
@@ -227,7 +227,7 @@ densplot(df=dfdens, grp="Cetaceans", ylab="Mean Density",
        height = 5.5, width = 5.5, ncol = 2, size = 8)
 # pa inverts
 presplot(df=dfpres, grp="Inverts", ylab="Prevalence (%)", 
-       height = 5.5, width = 5.2, ncol = 3, size = 8)
+       height = 7.5, width = 4.5, ncol = 2, size = 8)
 # mm
 presplot(df=dfpres, grp="MM", ylab="Prevalence (%)", 
          height = 2.5, width = 4.5, ncol = 3, size = 8)

@@ -79,7 +79,7 @@ DogfishBank <-  c("Dungeness_Crab") # "GlaucousWingedGull" no colonies within DB
 LearmonthBank  <-  c("Fin_Whale","Gray_Whale","Coral")# "Ancient_Murrelet", "CommonMurre","PigeonGuillemot", "RhinocerosAuklet" no colonies within learmonth bank
 BrooksPeninsula <- c("SeaOtterRange","Lingcod_line","TuftedPuffin",
                      "GlaucousWingedGull","Tanner_Crab") 
-                    #"Shearwaters","RhinocerosAuklet","CommonMurre",
+                    #"Shearwaters",("RhinocerosAuklet","CommonMurre") -> no colonies at brooks
 CapeStJames <- c("Halibut", "Halibut_line","StellarSeaLionRookeries",
                  "Humpback_Whale","Blue_Whale","Fin_Whale","Sponge", "Coral", "Seapen")#"Shearwaters"
 ShelfBreak <- c("Pacific_hake","Humpback_Whale","Sperm_Whale", "Blue_Whale",
@@ -98,10 +98,10 @@ ScottIslands <-  c("SeaOtterRange","Gray_Whale","Humpback_Whale","StellarSeaLion
                   #"Black_footed_Albatross", "Northern_Fulmar","Shearwaters"
 NorthIslandsStraits <- c("Killer_Whale","Gray_Whale", "Humpback_Whale",
                          "Shrimp","Prawn","Green_Urchin","SeaOtterRange","StormPetrels",
-                         "RhinocerosAuklet") 
+                         "RhinocerosAuklet") # Herring
 SpongeReefs <-  c("SpongeReef")
 ChathamSound  <- c("Green_Urchin","Dungeness_Crab","Shrimp","Herring_spawn","Killer_Whale",
-                   "Humpback_Whale") #"Scoters"
+                   "Humpback_Whale") #"Scoters", walleye pollock
 HaidaGwaiiNearshore <- c("Fin_Whale","Humpback_Whale","Gray_Whale","Red_Urchin",
                          "Red_Sea_Cucumber","Abalone", "Herring_spawn",
                          "Pacific_cod","StellarSeaLionRookeries","Arrowtooth_flounder",

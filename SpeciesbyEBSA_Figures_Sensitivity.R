@@ -213,8 +213,8 @@ presplot <- function(df, grp, ylab, height, width, ncol, size=size){
           axis.text.x = element_text(size=size, colour = "black", angle=90, vjust=0.5,hjust=1),
           axis.text.y = element_text(size=size, colour = "black"),
           axis.title = element_text(size=size+1, colour = "black"),
-          panel.spacing = unit(0.1, "lines"),
-          plot.margin = unit(c(0,.2,0,.2), "lines"))
+          panel.spacing = unit(0, "lines"),
+          plot.margin = unit(c(.1,.2,.1,.2), "lines"))
   tiff(file=file.path("Output/Figures/Sensitivity/Presence", paste0(grp, ".tif")),
        width = width , height = height, units = "in", res = 90)
   print(gfig)
@@ -236,9 +236,9 @@ densplot(df=dfdens, grp="Birds", ylab="Mean Density",
 # mammals
 densplot(df=dfdens, grp="Cetaceans", ylab="Mean Density", 
          height = 6.5, width = 6.5, ncol = 2, size = 8)
-# inverts
+# pa inverts
 presplot(df=dfpres, grp="Inverts", ylab="Prevalence (%)", 
-         height = 6, width = 6, ncol = 3, size = 8)
+         height = 8, width = 4.5, ncol = 2, size = 8)
 # mm
 presplot(df=dfpres, grp="MM", ylab="Prevalence (%)", 
          height = 3, width = 6, ncol = 3, size = 8)
