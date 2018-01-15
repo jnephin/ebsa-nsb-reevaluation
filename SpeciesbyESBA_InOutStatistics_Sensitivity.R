@@ -111,38 +111,49 @@ for(s in names(densEBSA)){
     rmna <- spdat[!is.na(spdat)]
     
     # Compute statistics of sample data
-    sp_mean <- mean(spdat, na.rm=TRUE)
-    sp_pPres <- pPres(spdat)*100
-    sp_pNA  <- pNA(spdat)*100
-    
-    # overwrite mean calc for outside sensitivity analysis
-    if(i == "OutsideSmall"){
-      sp_mean <- mean(sample(rmna,ssrange[1], replace = FALSE))
+    if( !i %in% c("OutsideSmall","OutsideMed","OutsideLarge")){
+      sp_mean <- mean(spdat, na.rm=TRUE)
+    } else if(i == "OutsideSmall"){
+      s_sample <- sample(rmna,ssrange[1])
+      sp_mean <- mean(s_sample)
     } else if(i == "OutsideMed"){
-      sp_mean <- mean(sample(rmna,ssrange[2], replace = FALSE))
+      m_sample <- sample(rmna,ssrange[2])
+      sp_mean <- mean(m_sample)
     } else if(i == "OutsideLarge"){
-      sp_mean <- mean(sample(rmna,ssrange[3], replace = FALSE))
+      l_sample <- sample(rmna,ssrange[3])
+      sp_mean <- mean(l_sample)
     }
     
     # Number of bootstrap samples
     nboot <- 10000
     # Generate bootstrap samples, i.e. an array of n x nboot 
-    n <- length(rmna)
-    if (i == "OutsideSmall") {n <- ssrange[1]; ssn <- ssrange[1]} # rarefy sample size
-    if (i == "OutsideMed") {n <- ssrange[2];  ssn <- ssrange[2]}# rarefy sample size
-    if (i == "OutsideLarge") {n <- ssrange[3]; ssn <- ssrange[3]}# rarefy sample size
+    if( !i %in% c("OutsideSmall","OutsideMed","OutsideLarge")){
+      n <- length(rmna)   
+    } else if (i == "OutsideSmall") {
+      rmna <- s_sample
+      n <- ssrange[1]
+      ssn <- ssrange[1]
+    } else if (i == "OutsideMed") {
+      rmna <- m_sample
+      n <- ssrange[2]
+      ssn <- ssrange[2]
+    } else if (i == "OutsideLarge") {
+      rmna <- l_sample
+      n <- ssrange[3]
+      ssn <- ssrange[3]
+    }
     tmpdata = sample(rmna,n*nboot, replace=TRUE)
     bootstrapsample = matrix(tmpdata, nrow=n, ncol=nboot)
     
     # Compute statistics of the bootstrap samples
     boot_mean <- apply(bootstrapsample, 2, mean, na.rm=TRUE)
     boot_pPres <- apply(bootstrapsample, 2, pPres) * 100
-
+    
     # Find the 0.05 and 0.95 quantile for each statistic
     # 95% CI using the percentile method
     q_mean = quantile(boot_mean, c(0.025, 0.975), na.rm=TRUE)
     q_pPres = quantile(boot_pPres, c(0.025, 0.975), na.rm=TRUE)
-
+    
     # Bind together
     stats <- c(sp_mean,sp_pPres,sp_pNA)
     lower <- c(q_mean[1],q_pPres[1],NA)
@@ -215,26 +226,42 @@ for( s in names(presEBSA) ){
     ssn <- length(spdat[!is.na(spdat)])
     
     # Compute statistics of sample data
-    sp_pPres <- pPres(spdat)*100
-    sp_pNA <- p0(spdat)*100
-    
-    # overwrite pPres calc for outside sensitivity analysis
-    if(i == "OutsideSmall"){
-      sp_pPres <- pPres(sample(spdat,ssrange[1]))*100
+    if( !i %in% c("OutsideSmall","OutsideMed","OutsideLarge")){
+      sp_pPres <- pPres(spdat)*100
+      sp_pNA <- p0(spdat)*100
+    } else if(i == "OutsideSmall"){
+      s_sample <- sample(spdat,ssrange[1])
+      sp_pPres <- pPres(s_sample)*100
+      sp_pNA <- p0(s_sample)*100
     } else if(i == "OutsideMed"){
-      sp_pPres <- pPres(sample(spdat,ssrange[2]))*100
+      m_sample <- sample(spdat,ssrange[2])
+      sp_pPres <- pPres(m_sample)*100
+      sp_pNA <- p0(m_sample)*100
     } else if(i == "OutsideLarge"){
-      sp_pPres <- pPres(sample(spdat,ssrange[3]))*100
+      l_sample <- sample(spdat,ssrange[3])
+      sp_pPres <- pPres(l_sample)*100
+      sp_pNA <- p0(l_sample)*100
     }
     
     # Number of bootstrap samples
     nboot <- 10000
     # Generate bootstrap samples, i.e. an array of n x nboot 
-    rmna <- spdat[!is.na(spdat)]
-    n <- length(rmna)
-    if (i == "OutsideSmall") {n <- ssrange[1]; ssn <- ssrange[1]} # rarefy sample size
-    if (i == "OutsideMed") {n <- ssrange[2];  ssn <- ssrange[2]}# rarefy sample size
-    if (i == "OutsideLarge") {n <- ssrange[3]; ssn <- ssrange[3]}# rarefy sample size
+    if( !i %in% c("OutsideSmall","OutsideMed","OutsideLarge")){
+      rmna <- spdat[!is.na(spdat)]
+      n <- length(rmna)   
+    } else if (i == "OutsideSmall") {
+      rmna <- s_sample
+      n <- ssrange[1]
+      ssn <- ssrange[1]
+    } else if (i == "OutsideMed") {
+      rmna <- m_sample
+      n <- ssrange[2]
+      ssn <- ssrange[2]
+    } else if (i == "OutsideLarge") {
+      rmna <- l_sample
+      n <- ssrange[3]
+      ssn <- ssrange[3]
+    }
     tmpdata = sample(rmna,n*nboot, replace=TRUE)
     bootstrapsample = matrix(tmpdata, nrow=n, ncol=nboot)
     

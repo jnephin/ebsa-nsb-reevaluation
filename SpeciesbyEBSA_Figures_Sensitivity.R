@@ -147,7 +147,11 @@ for (d in c("dfdens", "dfpres")){
 dfpres$maxval <- apply(data.frame(dfpres$upper_CI,dfpres$value), 1, max)
 dfdens$maxval <-  apply(data.frame(dfdens$upper_CI,dfdens$value), 1, max)
 
+# remove seapen
+dfdens <- dfdens[dfdens$Species != "Seapen",]
 
+# fix steller spelling
+dfpres$Species[dfpres$Species == "Stellar Sea Lion Rookeries"] <- "Steller Sea Lion Rookeries"
 
 # Save dfpres and dfdens to plot with maps
 save(dfdens, file="Aggregated/Denisty_PlotData_Sensitivity.Rdata")
@@ -158,9 +162,9 @@ save(dfpres, file="Aggregated/Presence_PlotData_Sensitivity.Rdata")
 # -------------------------------------------------#
 # plotting functions
 
-densplot <- function(df, grp, ylab, height, width, ncol, size=size){
+sensplot <- function(df, sp, ylab, height, width, size, folder){
   # subset by species
-  dfsub <- df[df$Group == grp,]
+  dfsub <- df[df$Species == sp,]
   # plot
   gfig <- ggplot(data = dfsub, aes(x=EBSA,y=value,colour=Area))+
     geom_point(pch=16, size=2.5)+
@@ -169,7 +173,6 @@ densplot <- function(df, grp, ylab, height, width, ncol, size=size){
     labs(x="", y=ylab)+
     scale_y_continuous(breaks = pretty_breaks(n=4),expand = c(0.2, 0))+
     scale_size_area(max_size = 3, name = "Data \ncoverage\n (%)")+
-    facet_wrap(~Species, scales="free", ncol=ncol)+
     scale_colour_manual(values=c("grey20","#386cb0"), guide=F)+
     theme(panel.border = element_rect(fill=NA, colour="black"),
           panel.background = element_rect(fill="white",colour="black"),
@@ -181,65 +184,30 @@ densplot <- function(df, grp, ylab, height, width, ncol, size=size){
           axis.text.x = element_text(size=size, colour = "black", angle=90, vjust=0.5,hjust=1),
           axis.text.y = element_text(size=size, colour = "black"),
           axis.title = element_text(size=size+1, colour = "black"),
-          panel.spacing = unit(0.1, "lines"),
           legend.key = element_blank(),
-          plot.margin = unit(c(.1,.2,.1,.2), "lines"))
-  tiff(file=file.path("Output/Figures/Sensitivity/Density", paste0(grp, ".tif")),
+          plot.margin = unit(c(.1,.1,.1,.1), "lines"))+
+    ggtitle(label="",subtitle = sp)
+  tiff(file=file.path("Output/Figures/Sensitivity/", folder, paste0(sp, ".tif")),
        width = width , height = height, units = "in", res = 90)
   print(gfig)
   dev.off()
 }
 
 
-presplot <- function(df, grp, ylab, height, width, ncol, size=size){
-  # subset by species
-  dfsub <- df[df$Group == grp,]
-  # plot
-  gfig <- ggplot(data = dfsub, aes(x=EBSA,y=value,colour=Area))+
-    geom_point(pch=16, size=2.5)+
-    geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)+
-    geom_text(aes(label=ss, y=maxval), vjust=-.5, size=2.5)+
-    labs(x="", y=ylab)+
-    scale_y_continuous(breaks = pretty_breaks(n=4),expand = c(0.2, 0))+
-    facet_wrap(~Species, scales="free", ncol=ncol)+
-    scale_colour_manual(values=c("grey20","#386cb0"), guide=F)+
-    theme(panel.border = element_rect(fill=NA, colour="black"),
-          panel.background = element_rect(fill="white",colour="black"),
-          strip.background = element_rect(fill="white",colour=NA),
-          strip.text = element_text(size=size+1, colour = "black", hjust=0, vjust=1),
-          axis.ticks = element_line(colour="black"),
-          panel.grid= element_blank(),
-          axis.ticks.length = unit(0.1,"cm"),
-          axis.text.x = element_text(size=size, colour = "black", angle=90, vjust=0.5,hjust=1),
-          axis.text.y = element_text(size=size, colour = "black"),
-          axis.title = element_text(size=size+1, colour = "black"),
-          panel.spacing = unit(0, "lines"),
-          plot.margin = unit(c(.1,.2,.1,.2), "lines"))
-  tiff(file=file.path("Output/Figures/Sensitivity/Presence", paste0(grp, ".tif")),
-       width = width , height = height, units = "in", res = 90)
-  print(gfig)
-  dev.off()
-}
 
 
 # -------------------------------------------------#
 # figures
-# fish
-densplot(df=dfdens, grp="Fish", ylab="Mean Density", 
-         height = 9, width = 7.5, ncol = 4, size = 8)
-# density inverts
-densplot(df=dfdens, grp="Inverts", ylab="Mean Density", 
-         height = 2.7, width = 7.5, ncol = 3, size = 8)
-# birds
-densplot(df=dfdens, grp="Birds", ylab="Mean Density", 
-         height = 4.5, width = 8, ncol = 4, size = 8)
-# mammals
-densplot(df=dfdens, grp="Cetaceans", ylab="Mean Density", 
-         height = 6.5, width = 6.5, ncol = 2, size = 8)
-# pa inverts
-presplot(df=dfpres, grp="Inverts", ylab="Prevalence (%)", 
-         height = 8, width = 4.5, ncol = 2, size = 8)
-# mm
-presplot(df=dfpres, grp="MM", ylab="Prevalence (%)", 
-         height = 3, width = 6, ncol = 3, size = 8)
+
+# density
+for (i in unique(dfdens$Species)){
+  sensplot(df=dfdens, sp=i, ylab="Mean Density", folder="Density",
+           height = 2.5, width = 2.8, size = 8)
+}
+
+# pa 
+for (i in unique(dfpres$Species)){
+  sensplot(df=dfpres, sp=i, ylab="Occurrence (%)", folder="Presence",
+           height = 2.5, width = 2.8, size = 8)
+}
 

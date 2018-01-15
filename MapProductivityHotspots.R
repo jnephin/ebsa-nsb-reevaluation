@@ -76,7 +76,7 @@ MapRaster <- function( layer, filename, legend ){
   lims <- list( x=c(ext@xmin*1.1, ext@xmax*.98), y=c(ext@ymin*1.05, ext@ymax*.98) )
   
   #colour
-  pal <- c("lightblue","goldenrod3")
+  pal <- c("#c2edfc","#ddae36")
   
   # Map (up to 500,000 pixels)
   tiff( file=paste0("Output/Maps/Productivity/",filename,"_1km.tif"), 
@@ -84,10 +84,10 @@ MapRaster <- function( layer, filename, legend ){
         units = "in", res = 300,
         compression = "lzw")
   par(mar=c(.5,.5,.5,.5))
-  plot( bcPoly, col = "grey60", border = NA, xlim = lims$x , ylim = lims$y)
+  plot( bcPoly, col = "grey70", border = NA, xlim = lims$x , ylim = lims$y)
   plot( layer, maxpixels=500000, add=TRUE, col=pal, legend=FALSE, useRaster=FALSE)
-  plot( bcPoly, col = "grey60", add=TRUE, border = NA)
-  plot( nsb, border = "black", add=TRUE, col = NA, lwd=.5 )
+  plot( bcPoly, col = "grey70", add=TRUE, border = NA)
+  #plot( nsb, border = "black", add=TRUE, col = NA, lwd=.5 )
   plot( spdf, add=T, lwd=.8, lty=3 )
   legend("topright",  col=pal, pch=15, bty="n", bg=NA, 
          legend = c("Data extent", "Hotspot"),

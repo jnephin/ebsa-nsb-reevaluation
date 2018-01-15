@@ -102,17 +102,22 @@ dfdp$Metric <- factor(dfdp$Metric, levels=c("Bloom frequency","Mean Chla","Fish 
 # Save dfdp to plot with maps
 save(dfdp, file="Aggregated/DivProd_PlotData_Sensitivity.Rdata")
 
-# -------------------------------------------------#
-# plotting function
 
-spplot <- function(df, ylab, filename, height, width, ncol, size=size){
-  gfig <- ggplot(data = df, aes(x=EBSA,y=value,colour=Area))+
+
+# -------------------------------------------------#
+# plotting functions
+
+sensplot <- function(df, sp, ylab, height, width, size, folder){
+  # subset by species
+  dfsub <- df[df$Metric == sp,]
+  # plot
+  gfig <- ggplot(data = dfsub, aes(x=EBSA,y=value,colour=Area))+
     geom_point(pch=16, size=2.5)+
     geom_errorbar(aes(ymin=lower_CI,ymax=upper_CI), size=1, width=0)+
     geom_text(aes(label=ss, y=maxval), vjust=-.5, size=2.5) +
-    scale_y_continuous(breaks = pretty_breaks(n=4),expand = c(0.1, 0))+
     labs(x="", y=ylab)+
-    facet_wrap(~Metric, scales="free", ncol=ncol)+
+    scale_y_continuous(breaks = pretty_breaks(n=4),expand = c(0.2, 0))+
+    scale_size_area(max_size = 3, name = "Data \ncoverage\n (%)")+
     scale_colour_manual(values=c("grey20","#386cb0"), guide=F)+
     theme(panel.border = element_rect(fill=NA, colour="black"),
           panel.background = element_rect(fill="white",colour="black"),
@@ -124,26 +129,36 @@ spplot <- function(df, ylab, filename, height, width, ncol, size=size){
           axis.text.x = element_text(size=size, colour = "black", angle=90, vjust=0.5,hjust=1),
           axis.text.y = element_text(size=size, colour = "black"),
           axis.title = element_text(size=size+1, colour = "black"),
-          panel.spacing = unit(0.1, "lines"),
           legend.key = element_blank(),
-          plot.margin = unit(c(0,.2,0,.2), "lines"))
-  tiff(paste0("Output/Figures/Sensitivity/",filename,".tif"),
+          plot.margin = unit(c(.1,.1,.1,.1), "lines"))+
+    ggtitle(label="",subtitle = sp)
+  tiff(file=file.path("Output/Figures/Sensitivity/", folder, paste0(sp, ".tif")),
        width = width , height = height, units = "in", res = 90)
   print(gfig)
   dev.off()
 }
 
 
+
+
 # -------------------------------------------------#
-# figure
-spplot(df=dfdp[dfdp$Metric %in% c("Fish Diversity","Invert Diversity",
-                                  "Fish Richness", "Invert Richness"),], 
-       filename="Diversity", ylab="Mean Diversity Indices", 
-       height = 5, width = 6, ncol = 2, size = 8)
-spplot(df=dfdp[dfdp$Metric %in% c("Bloom frequency","Mean Chla"),], 
-       filename="Productivity", ylab="Chlorophyll Biomass Indices", 
-       height = 3, width = 9, ncol = 2, size = 8)
+# figures
+
+# diveristy
+for (i in c("Fish Diversity","Invert Diversity")){
+  sensplot(df=dfdp, sp=i, ylab="Mean Diversity", folder="Diversity",
+           height = 2.5, width = 2.8, size = 8)
+}
 
 
+# richness
+for (i in c("Fish Richness","Invert Richness")){
+  sensplot(df=dfdp, sp=i, ylab="Mean Richness", folder="Diversity",
+           height = 2.5, width = 2.8, size = 8)
+}
 
-
+# richness
+sensplot(df=dfdp, sp="Bloom frequency", ylab="Frequency of monthly\n plankton blooms", 
+         folder="Productivity", height = 3, width = 4.5, size = 8)
+sensplot(df=dfdp, sp="Mean Chla", ylab="Mean Chlorophyll a\n (mg m-3)", 
+         folder="Productivity", height = 3, width = 4.5, size = 8)
